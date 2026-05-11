@@ -1,0 +1,67 @@
+/* =========================
+   🔥 GLOBAL BUTTON (REUSABLE)
+========================= */
+.btn-premium {
+  padding: 12px 28px;
+  border: 1px solid #ff7a00;
+  color: #ff7a00;
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;         
+  align-items: center;
+  gap: 10px;                   
+  transition: 0.3s ease;
+}
+
+/* ICON */
+.btn-premium i {
+  font-size: 12px;
+  transition: 0.3s ease;
+}
+
+/* ICON ANIMATION */
+.btn-premium:hover i {
+  transform: translateX(5px); 
+}
+
+/* =========================
+   SHINE EFFECT
+========================= */
+.btn-premium::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.6),
+    transparent
+  );
+
+  transform: skewX(-25deg);
+}
+
+/* SHINE ANIMATION */
+.btn-premium:hover::before {
+  animation: shine 0.8s ease forwards;
+}
+
+@keyframes shine {
+  100% { left: 125%; }
+}
+
+/* =========================
+   HOVER STATE
+========================= */
+.btn-premium:hover {
+  background: #ff7a00;
+  color: #000;
+  box-shadow: 0 0 15px rgba(255,122,0,0.5);
+}
