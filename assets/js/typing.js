@@ -1,13 +1,37 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-  const roles = [
-    { prefix: "I'm ", text: "Neil Roy Generale Omongos" },
-    { prefix: "I'm a ", text: "Frontend Developer" },
-    { prefix: "I'm a ", text: "UI/UX Designer" },
-    { prefix: "I'm a ", text: "Creative Designer" },
-    { prefix: "I'm a ", text: "Multimedia Editor" },
-    { prefix: "Also known as ", text: "Natsume" }
-  ];
+  const element = document.getElementById("typed-text");
+
+  if (!element) return;
+
+  const rawRoles = JSON.parse(element.dataset.roles || "[]");
+
+  const roles = rawRoles.map(role => {
+    role = role.trim();
+
+    if (role.toLowerCase().includes("known as")) {
+      return {
+        prefix: "Also known as ",
+        text: role.replace(/known as/i, "").trim()
+      };
+    }
+
+    if (
+      role.toLowerCase().includes("developer") ||
+      role.toLowerCase().includes("designer") ||
+      role.toLowerCase().includes("editor")
+    ) {
+      return {
+        prefix: "I'm a ",
+        text: role
+      };
+    }
+
+    return {
+      prefix: "I'm ",
+      text: role
+    };
+  });
 
   let i = 0;
   let j = 0;
@@ -17,9 +41,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const eraseSpeed = 40;
   const delay = 1500;
 
-  const element = document.getElementById("typed-text");
-
   function typeEffect() {
+
+    if (!roles.length) return;
+
     const current = roles[i];
     const fullText = current.text;
 
@@ -31,7 +56,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const visibleText = fullText.substring(0, j);
 
-    // IMPORTANT: split colors
     element.innerHTML =
       `<span class="white">${current.prefix}</span>` +
       `<span class="gradient">${visibleText}</span>`;

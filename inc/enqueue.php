@@ -95,11 +95,38 @@ function natsume_portfolio_enqueue_assets() {
         true
     );
 
+    // ─── GSAP Core ───────────────────────────────────────────────────
+    wp_enqueue_script(
+        'natsume_portfolio-gsap',
+        'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js',
+        array(),
+        null,
+        true
+    );
+
+    // ─── GSAP ScrollTrigger ──────────────────────────────────────────
+    wp_enqueue_script(
+        'natsume_portfolio-scrolltrigger',
+        'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js',
+        array('natsume_portfolio-gsap'),
+        null,
+        true
+    );
+
     // ─── Certificate JS ───────────────────────────────────────────────
     wp_enqueue_script(
         'natsume_portfolio-cert',
         NATSUME_PORTFOLIO_URI . '/assets/js/cert.js',
-        array(),
+        array('natsume_portfolio-scrolltrigger'),
+        NATSUME_PORTFOLIO_VERSION,
+        true
+    );
+
+    // ─── Home Page Animations ─────────────────────────────────────────
+    wp_enqueue_script(
+        'natsume_portfolio-home',
+        NATSUME_PORTFOLIO_URI . '/assets/js/home.js',
+        array('natsume_portfolio-scrolltrigger'),
         NATSUME_PORTFOLIO_VERSION,
         true
     );
@@ -108,9 +135,25 @@ function natsume_portfolio_enqueue_assets() {
     if (is_page_template('templates/page-about.php')) {
         wp_enqueue_style(
             'natsume_portfolio-page',
-            NATSUME_PORTFOLIO_URI . '/assets/css/page.css',
+            NATSUME_PORTFOLIO_URI . '/assets/css/about.css',
             array(),
             NATSUME_PORTFOLIO_VERSION
+        );
+
+        wp_enqueue_script(
+            'natsume_portfolio-about-smoke',
+            NATSUME_PORTFOLIO_URI . '/assets/js/about-smoke.js',
+            array(),
+            NATSUME_PORTFOLIO_VERSION,
+            true
+        );
+
+        wp_enqueue_script(
+            'natsume_portfolio-beyond',
+            NATSUME_PORTFOLIO_URI . '/assets/js/beyond-content.js',
+            array(),
+            NATSUME_PORTFOLIO_VERSION,
+            true
         );
     }
 }

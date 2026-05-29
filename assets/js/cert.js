@@ -1,60 +1,86 @@
 document.addEventListener("DOMContentLoaded", () => {
+  if (!window.gsap || !window.ScrollTrigger) return;
 
-  const years = document.querySelectorAll(".year");
-  const contents = document.querySelectorAll(".cert-content");
-  const image = document.getElementById("cert-image");
+  gsap.registerPlugin(ScrollTrigger);
 
-  function activateItem(item) {
-    const parent = item.parentElement;
+  const section = document.querySelector('.cert-section');
+  const track = section?.querySelector('.cert-track');
+  const cards = gsap.utils.toArray('.cert-card, .cert-button-card');
 
-    parent.querySelectorAll(".cert-item").forEach(i => {
-      i.classList.remove("active");
-      const desc = i.querySelector(".cert-desc");
-      if (desc) desc.textContent = "";
+  if (!section || !track || cards.length === 0) return;
+
+  const createAnimation = () => {
+    const scrollAmount = Math.max(track.scrollWidth - window.innerWidth, 0);
+
+    gsap.to(track, {
+      x: -scrollAmount,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: () => `+=${scrollAmount}`,
+        scrub: 1,
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      },
     });
 
-    item.classList.add("active");
+    cards.forEach(( card, index) => {
+      const isCenterCard = index % 3 === 1;
+      const fromY = isCenterCard ? 0 : 70;
+      const toY = isCenterCard ? -20 : -60;
+      const fromScale = isCenterCard ? 1 : 0.97;
 
-    // IMAGE
-    image.src = item.dataset.img;
-
-    // DESCRIPTION
-    const descBox = item.querySelector(".cert-desc");
-    if (descBox) {
-      descBox.textContent = item.dataset.desc;
-    }
-  }
-
-  /* YEAR CLICK */
-  years.forEach(year => {
-    year.addEventListener("click", () => {
-
-      years.forEach(y => y.classList.remove("active"));
-      contents.forEach(c => c.classList.remove("active"));
-
-      year.classList.add("active");
-
-      const target = year.dataset.target;
-      const content = document.getElementById(target);
-
-      content.classList.add("active");
-
-      const firstItem = content.querySelector(".cert-item");
-
-      if (firstItem) activateItem(firstItem);
+      gsap.fromTo(card, {
+        y: fromY,
+        scale: fromScale,
+      }, {
+        y: toY,
+        scale: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: () => `+=${scrollAmount}`,
+          scrub: 1,
+          invalidateOnRefresh: true,
+        },
+      });
     });
+
+    ScrollTrigger.create({
+      trigger: section,
+      start: 'top top',
+      end: () => `+=${scrollAmount}`,
+      scrub: 1,
+      invalidateOnRefresh: true,
+      onUpdate: () => {
+        const centerX = window.innerWidth / 2;
+        let closest = null;
+        let minDistance = Infinity;
+
+        cards.forEach(card => {
+          const rect = card.getBoundingClientRect();
+          const cardCenter = rect.left + rect.width / 2;
+          const distance = Math.abs(cardCenter - centerX);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closest = card;
+          }
+        });
+
+        cards.forEach(card => {
+          card.classList.toggle('active-card', card === closest);
+        });
+      },
+    });
+  };
+
+  createAnimation();
+  ScrollTrigger.refresh();
+
+  window.addEventListener('resize', () => {
+    ScrollTrigger.refresh();
   });
-
-  /* ITEM CLICK */
-  document.addEventListener("click", (e) => {
-    const item = e.target.closest(".cert-item");
-    if (!item) return;
-
-    activateItem(item);
-  });
-
-  /* INIT FIRST */
-  const firstActive = document.querySelector(".cert-item.active");
-  if (firstActive) activateItem(firstActive);
-
 });

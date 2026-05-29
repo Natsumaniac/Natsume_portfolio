@@ -61,3 +61,33 @@ function natsume_portfolio_fallback_menu() {
     echo '<li><a href="' . esc_url(home_url('/contact/')) . '"><i class="fas fa-envelope"></i> Contact</a></li>';
     echo '</ul>';
 }
+
+// ─── ACF Theme Option Pages ─────────────────────────────────────────
+if (function_exists('acf_add_options_page')) {
+
+    acf_add_options_page(array(
+        'page_title' => 'Theme Settings',
+        'menu_title' => 'Theme Settings',
+        'menu_slug'  => 'theme-settings',
+        'capability' => 'edit_posts',
+        'redirect'   => false
+    ));
+
+    acf_add_options_sub_page(array(
+        'page_title'  => 'Global Header',
+        'menu_title'  => 'Global Header',
+        'parent_slug' => 'theme-settings',
+    ));
+
+    acf_add_options_sub_page(array(
+        'page_title'  => 'Global Footer',
+        'menu_title'  => 'Global Footer',
+        'parent_slug' => 'theme-settings',
+    ));
+
+    acf_add_options_sub_page(array(
+        'page_title'  => 'Global Social Links',
+        'menu_title'  => 'Global Social Links',
+        'parent_slug' => 'theme-settings',
+    ));
+}

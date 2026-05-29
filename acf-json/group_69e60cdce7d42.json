@@ -1,6 +1,6 @@
 {
     "key": "group_69e60cdce7d42",
-    "title": "Hero Section",
+    "title": "Hero Background Video",
     "fields": [
         {
             "key": "field_69e60cdfa5db1",
@@ -64,5 +64,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1776684509
+    "modified": 1779274570
 }
