@@ -61,6 +61,30 @@ document.addEventListener('DOMContentLoaded', function() {
       case 'cta':
         animateCtaSection();
         break;
+      case 'about-hero':
+        animateAboutHeroSection();
+        break;
+      case 'about-intro':
+        animateAboutIntroSection();
+        break;
+      case 'identity':
+        animateIdentitySection();
+        break;
+      case 'drives':
+        animateDrivesSection();
+        break;
+      case 'beyond':
+        animateBeyondSection();
+        break;
+      case 'quote':
+        animateQuoteSection();
+        break;
+      case 'works-archive':
+        animateWorksArchivePage();
+        break;
+      case 'single-work-page':
+        animateSingleWorkPage();
+        break;
     }
   }
 
@@ -83,6 +107,30 @@ document.addEventListener('DOMContentLoaded', function() {
         break;
       case 'cta':
         resetCtaSection();
+        break;
+      case 'about-hero':
+        resetAboutHeroSection();
+        break;
+      case 'about-intro':
+        resetAboutIntroSection();
+        break;
+      case 'identity':
+        resetIdentitySection();
+        break;
+      case 'drives':
+        resetDrivesSection();
+        break;
+      case 'beyond':
+        resetBeyondSection();
+        break;
+      case 'quote':
+        resetQuoteSection();
+        break;
+      case 'works-archive':
+        resetWorksArchivePage();
+        break;
+      case 'single-work-page':
+        resetSingleWorkPage();
         break;
     }
   }
@@ -179,6 +227,194 @@ document.addEventListener('DOMContentLoaded', function() {
     if (aboutTitle) gsap.set(aboutTitle, { opacity: 0, y: 40, filter: 'blur(8px)' });
     if (aboutText) gsap.set(aboutText, { opacity: 0, y: 40, filter: 'blur(8px)' });
     if (aboutButtons) gsap.set(aboutButtons, { opacity: 0, y: 40, filter: 'blur(8px)' });
+  }
+
+  function animateAboutHeroSection() {
+    const heroSection = document.querySelector('.about-hero');
+    if (!heroSection) return;
+
+    const leftBox = heroSection.querySelector('.left-content .content-box');
+    const rightBox = heroSection.querySelector('.right-content .content-box');
+
+    if (leftBox) gsap.set(leftBox, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (rightBox) gsap.set(rightBox, { opacity: 0, y: 40, filter: 'blur(8px)' });
+
+    const heroTimeline = gsap.timeline({ defaults: { duration: 0.85, ease: 'power2.out' } });
+    if (leftBox) heroTimeline.to(leftBox, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0);
+    if (rightBox) heroTimeline.to(rightBox, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0.15);
+  }
+
+  function resetAboutHeroSection() {
+    const heroSection = document.querySelector('.about-hero');
+    if (!heroSection) return;
+
+    const leftBox = heroSection.querySelector('.left-content .content-box');
+    const rightBox = heroSection.querySelector('.right-content .content-box');
+
+    gsap.killTweensOf([leftBox, rightBox]);
+
+    if (leftBox) gsap.set(leftBox, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (rightBox) gsap.set(rightBox, { opacity: 0, y: 40, filter: 'blur(8px)' });
+  }
+
+  function animateAboutIntroSection() {
+    const introSection = document.querySelector('.about-intro-section');
+    if (!introSection) return;
+
+    const header = introSection.querySelector('.about-intro-header');
+    const leftPanel = introSection.querySelector('.about-intro-left');
+    const rightPanel = introSection.querySelector('.about-intro-right');
+
+    if (header) gsap.set(header, { opacity: 0, y: 30, filter: 'blur(6px)' });
+    if (leftPanel) gsap.set(leftPanel, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (rightPanel) gsap.set(rightPanel, { opacity: 0, y: 40, filter: 'blur(8px)' });
+
+    const introTimeline = gsap.timeline({ defaults: { duration: 0.8, ease: 'power2.out' } });
+    if (header) introTimeline.to(header, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0);
+    if (leftPanel) introTimeline.to(leftPanel, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0.18);
+    if (rightPanel) introTimeline.to(rightPanel, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0.32);
+  }
+
+  function resetAboutIntroSection() {
+    const introSection = document.querySelector('.about-intro-section');
+    if (!introSection) return;
+
+    const header = introSection.querySelector('.about-intro-header');
+    const leftPanel = introSection.querySelector('.about-intro-left');
+    const rightPanel = introSection.querySelector('.about-intro-right');
+
+    gsap.killTweensOf([header, leftPanel, rightPanel]);
+
+    if (header) gsap.set(header, { opacity: 0, y: 30, filter: 'blur(6px)' });
+    if (leftPanel) gsap.set(leftPanel, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (rightPanel) gsap.set(rightPanel, { opacity: 0, y: 40, filter: 'blur(8px)' });
+  }
+
+  function animateIdentitySection() {
+    const identitySection = document.querySelector('.identity-section');
+    if (!identitySection) return;
+
+    const overlay = identitySection.querySelector('.identity-overlay');
+    const leftCards = identitySection.querySelectorAll('.identity-left .identity-card');
+    const rightCards = identitySection.querySelectorAll('.identity-right .identity-card');
+
+    if (overlay) gsap.set(overlay, { opacity: 0, scale: 1.02 });
+    if (leftCards.length) gsap.set(leftCards, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (rightCards.length) gsap.set(rightCards, { opacity: 0, y: 40, filter: 'blur(8px)' });
+
+    const identityTimeline = gsap.timeline({ defaults: { duration: 0.85, ease: 'power2.out' } });
+    if (overlay) identityTimeline.to(overlay, { opacity: 1, scale: 1, ease: 'none' }, 0);
+    identityTimeline.to(leftCards, { opacity: 1, y: 0, filter: 'blur(0px)', stagger: 0.08 }, 0.1);
+    identityTimeline.to(rightCards, { opacity: 1, y: 0, filter: 'blur(0px)', stagger: 0.08 }, 0.18);
+  }
+
+  function resetIdentitySection() {
+    const identitySection = document.querySelector('.identity-section');
+    if (!identitySection) return;
+
+    const overlay = identitySection.querySelector('.identity-overlay');
+    const leftCards = identitySection.querySelectorAll('.identity-left .identity-card');
+    const rightCards = identitySection.querySelectorAll('.identity-right .identity-card');
+
+    gsap.killTweensOf([overlay, ...leftCards, ...rightCards]);
+
+    if (overlay) gsap.set(overlay, { opacity: 0, scale: 1.02 });
+    if (leftCards.length) gsap.set(leftCards, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (rightCards.length) gsap.set(rightCards, { opacity: 0, y: 40, filter: 'blur(8px)' });
+  }
+
+  function animateDrivesSection() {
+    const drivesSection = document.querySelector('.drives-section');
+    if (!drivesSection) return;
+
+    const title = drivesSection.querySelector('.drives-title');
+    const cards = drivesSection.querySelectorAll('.drive-card');
+
+    if (title) gsap.set(title, { opacity: 0, y: 30, filter: 'blur(6px)' });
+    if (cards.length) gsap.set(cards, { opacity: 0, y: 40, filter: 'blur(8px)' });
+
+    const drivesTimeline = gsap.timeline({ defaults: { duration: 0.8, ease: 'power2.out' } });
+    if (title) drivesTimeline.to(title, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0);
+    drivesTimeline.to(cards, { opacity: 1, y: 0, filter: 'blur(0px)', stagger: 0.08 }, 0.2);
+  }
+
+  function resetDrivesSection() {
+    const drivesSection = document.querySelector('.drives-section');
+    if (!drivesSection) return;
+
+    const title = drivesSection.querySelector('.drives-title');
+    const cards = drivesSection.querySelectorAll('.drive-card');
+
+    gsap.killTweensOf([title, ...cards]);
+
+    if (title) gsap.set(title, { opacity: 0, y: 30, filter: 'blur(6px)' });
+    if (cards.length) gsap.set(cards, { opacity: 0, y: 40, filter: 'blur(8px)' });
+  }
+
+  function animateBeyondSection() {
+    const beyondSection = document.querySelector('.beyond-section');
+    if (!beyondSection) return;
+
+    const title = beyondSection.querySelector('.beyond-title');
+    const leftPanel = beyondSection.querySelector('.beyond-left');
+    const cards = beyondSection.querySelectorAll('.beyond-card');
+
+    if (title) gsap.set(title, { opacity: 0, y: 30, filter: 'blur(6px)' });
+    if (leftPanel) gsap.set(leftPanel, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (cards.length) gsap.set(cards, { opacity: 0, y: 40, filter: 'blur(8px)' });
+
+    const beyondTimeline = gsap.timeline({ defaults: { duration: 0.85, ease: 'power2.out' } });
+    if (title) beyondTimeline.to(title, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0);
+    if (leftPanel) beyondTimeline.to(leftPanel, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0.18);
+    beyondTimeline.to(cards, { opacity: 1, y: 0, filter: 'blur(0px)', stagger: 0.06 }, 0.28);
+  }
+
+  function resetBeyondSection() {
+    const beyondSection = document.querySelector('.beyond-section');
+    if (!beyondSection) return;
+
+    const title = beyondSection.querySelector('.beyond-title');
+    const leftPanel = beyondSection.querySelector('.beyond-left');
+    const cards = beyondSection.querySelectorAll('.beyond-card');
+
+    gsap.killTweensOf([title, leftPanel, ...cards]);
+
+    if (title) gsap.set(title, { opacity: 0, y: 30, filter: 'blur(6px)' });
+    if (leftPanel) gsap.set(leftPanel, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (cards.length) gsap.set(cards, { opacity: 0, y: 40, filter: 'blur(8px)' });
+  }
+
+  function animateQuoteSection() {
+    const quoteSection = document.querySelector('.quote-section');
+    if (!quoteSection) return;
+
+    const quoteBox = quoteSection.querySelector('.quote-container');
+    const quoteText = quoteSection.querySelector('.quote-text');
+    const author = quoteSection.querySelector('.quote-author');
+
+    if (quoteBox) gsap.set(quoteBox, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (quoteText) gsap.set(quoteText, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (author) gsap.set(author, { opacity: 0, y: 40, filter: 'blur(8px)' });
+
+    const quoteTimeline = gsap.timeline({ defaults: { duration: 0.85, ease: 'power2.out' } });
+    if (quoteBox) quoteTimeline.to(quoteBox, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0);
+    if (quoteText) quoteTimeline.to(quoteText, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0.15);
+    if (author) quoteTimeline.to(author, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0.25);
+  }
+
+  function resetQuoteSection() {
+    const quoteSection = document.querySelector('.quote-section');
+    if (!quoteSection) return;
+
+    const quoteBox = quoteSection.querySelector('.quote-container');
+    const quoteText = quoteSection.querySelector('.quote-text');
+    const author = quoteSection.querySelector('.quote-author');
+
+    gsap.killTweensOf([quoteBox, quoteText, author]);
+
+    if (quoteBox) gsap.set(quoteBox, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (quoteText) gsap.set(quoteText, { opacity: 0, y: 40, filter: 'blur(8px)' });
+    if (author) gsap.set(author, { opacity: 0, y: 40, filter: 'blur(8px)' });
   }
 
   // ────────────────────────────────────────
@@ -552,6 +788,84 @@ document.addEventListener('DOMContentLoaded', function() {
     if (ctaButton) gsap.set(ctaButton, { opacity: 0, scale: 0.9 });
   }
 
+  function animateWorksArchivePage() {
+    const archiveSection = document.querySelector('.works-archive');
+    if (!archiveSection) return;
+
+    const topbar = archiveSection.querySelector('.works-topbar');
+    const cards = archiveSection.querySelectorAll('.work-card');
+    const pagination = archiveSection.querySelector('.works-pagination');
+    const emptyState = archiveSection.querySelector('.works-empty');
+
+    if (topbar) gsap.set(topbar, { opacity: 0, y: 28, filter: 'blur(6px)' });
+    gsap.set(cards, { opacity: 0, y: 28, filter: 'blur(6px)' });
+    if (pagination) gsap.set(pagination, { opacity: 0, y: 24 });
+    if (emptyState) gsap.set(emptyState, { opacity: 0, y: 24 });
+
+    const archiveTimeline = gsap.timeline({ defaults: { duration: 0.75, ease: 'power2.out' } });
+
+    if (topbar) archiveTimeline.to(topbar, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0);
+    archiveTimeline.to(cards, { opacity: 1, y: 0, filter: 'blur(0px)', stagger: 0.06 }, 0.15);
+    if (pagination) archiveTimeline.to(pagination, { opacity: 1, y: 0 }, 0.35);
+    if (emptyState) archiveTimeline.to(emptyState, { opacity: 1, y: 0 }, 0.25);
+  }
+
+  function resetWorksArchivePage() {
+    const archiveSection = document.querySelector('.works-archive');
+    if (!archiveSection) return;
+
+    const topbar = archiveSection.querySelector('.works-topbar');
+    const cards = archiveSection.querySelectorAll('.work-card');
+    const pagination = archiveSection.querySelector('.works-pagination');
+    const emptyState = archiveSection.querySelector('.works-empty');
+
+    gsap.killTweensOf([topbar, ...cards, pagination, emptyState]);
+
+    if (topbar) gsap.set(topbar, { opacity: 0, y: 28, filter: 'blur(6px)' });
+    gsap.set(cards, { opacity: 0, y: 28, filter: 'blur(6px)' });
+    if (pagination) gsap.set(pagination, { opacity: 0, y: 24 });
+    if (emptyState) gsap.set(emptyState, { opacity: 0, y: 24 });
+  }
+
+  function animateSingleWorkPage() {
+    const singlePage = document.querySelector('.single-work-page');
+    if (!singlePage) return;
+
+    const topbar = singlePage.querySelector('.single-work-topbar');
+    const mainCard = singlePage.querySelector('.single-work__primary-card');
+    const sections = singlePage.querySelectorAll('.single-work__section');
+    const sidebarPanel = singlePage.querySelector('.single-work__sidebar .sidebar-panel');
+
+    if (topbar) gsap.set(topbar, { opacity: 0, y: 24, filter: 'blur(6px)' });
+    if (mainCard) gsap.set(mainCard, { opacity: 0, y: 30, filter: 'blur(6px)' });
+    gsap.set(sections, { opacity: 0, y: 28, filter: 'blur(6px)' });
+    if (sidebarPanel) gsap.set(sidebarPanel, { opacity: 0, y: 30, filter: 'blur(6px)' });
+
+    const singleTimeline = gsap.timeline({ defaults: { duration: 0.8, ease: 'power2.out' } });
+
+    if (topbar) singleTimeline.to(topbar, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0);
+    if (mainCard) singleTimeline.to(mainCard, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0.08);
+    singleTimeline.to(sections, { opacity: 1, y: 0, filter: 'blur(0px)', stagger: 0.12 }, 0.2);
+    if (sidebarPanel) singleTimeline.to(sidebarPanel, { opacity: 1, y: 0, filter: 'blur(0px)' }, 0.25);
+  }
+
+  function resetSingleWorkPage() {
+    const singlePage = document.querySelector('.single-work-page');
+    if (!singlePage) return;
+
+    const topbar = singlePage.querySelector('.single-work-topbar');
+    const mainCard = singlePage.querySelector('.single-work__primary-card');
+    const sections = singlePage.querySelectorAll('.single-work__section');
+    const sidebarPanel = singlePage.querySelector('.single-work__sidebar .sidebar-panel');
+
+    gsap.killTweensOf([topbar, mainCard, ...sections, sidebarPanel]);
+
+    if (topbar) gsap.set(topbar, { opacity: 0, y: 24, filter: 'blur(6px)' });
+    if (mainCard) gsap.set(mainCard, { opacity: 0, y: 30, filter: 'blur(6px)' });
+    gsap.set(sections, { opacity: 0, y: 28, filter: 'blur(6px)' });
+    if (sidebarPanel) gsap.set(sidebarPanel, { opacity: 0, y: 30, filter: 'blur(6px)' });
+  }
+
   // ────────────────────────────────────────
   // INITIALIZE ALL ANIMATIONS
   // ────────────────────────────────────────
@@ -563,6 +877,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const skillsSection = document.querySelector('.skills-section');
     const certSection = document.querySelector('.cert-section');
     const ctaSection = document.querySelector('.cta-section');
+    const aboutHeroSection = document.querySelector('.about-hero');
+    const aboutIntroSection = document.querySelector('.about-intro-section');
+    const identitySection = document.querySelector('.identity-section');
+    const drivesSection = document.querySelector('.drives-section');
+    const beyondSection = document.querySelector('.beyond-section');
+    const quoteSection = document.querySelector('.quote-section');
+    const worksArchivePage = document.querySelector('.works-archive');
+    const singleWorkPage = document.querySelector('.single-work-page');
 
     // Reset each section to its hidden initial state first so the first reveal is controlled
     if (heroSection) resetHeroSection();
@@ -571,6 +893,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (skillsSection) resetSkillsSection();
     if (certSection) resetCertificatesSection();
     if (ctaSection) resetCtaSection();
+    if (aboutHeroSection) resetAboutHeroSection();
+    if (aboutIntroSection) resetAboutIntroSection();
+    if (identitySection) resetIdentitySection();
+    if (drivesSection) resetDrivesSection();
+    if (beyondSection) resetBeyondSection();
+    if (quoteSection) resetQuoteSection();
+    if (worksArchivePage) resetWorksArchivePage();
+    if (singleWorkPage) resetSingleWorkPage();
 
     // Observe each section
     if (heroSection) observer.observe(heroSection);
@@ -579,6 +909,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (skillsSection) observer.observe(skillsSection);
     if (certSection) observer.observe(certSection);
     if (ctaSection) observer.observe(ctaSection);
+    if (aboutHeroSection) observer.observe(aboutHeroSection);
+    if (aboutIntroSection) observer.observe(aboutIntroSection);
+    if (identitySection) observer.observe(identitySection);
+    if (drivesSection) observer.observe(drivesSection);
+    if (beyondSection) observer.observe(beyondSection);
+    if (quoteSection) observer.observe(quoteSection);
+    if (worksArchivePage) observer.observe(worksArchivePage);
+    if (singleWorkPage) observer.observe(singleWorkPage);
   }
 
   // Initialize when page loads

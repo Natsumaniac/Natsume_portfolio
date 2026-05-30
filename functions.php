@@ -51,6 +51,19 @@ function add_page_template_body_class($classes) {
     return $classes;
 }
 
+// ─── Custom Template Loader for templates/ subdirectory ──────────────
+add_filter('template_include', 'natsume_portfolio_template_loader');
+function natsume_portfolio_template_loader($template) {
+    // Check if this is a single 'work' post
+    if (is_singular('work')) {
+        $templates_dir = NATSUME_PORTFOLIO_DIR . '/templates/single-work.php';
+        if (file_exists($templates_dir)) {
+            return $templates_dir;
+        }
+    }
+    return $template;
+}
+
 // ─── Fallback Menu Function ──────────────────────────────────────────
 function natsume_portfolio_fallback_menu() {
     echo '<ul class="nav-links">';

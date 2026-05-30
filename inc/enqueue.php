@@ -59,6 +59,54 @@ function natsume_portfolio_enqueue_assets() {
         NATSUME_PORTFOLIO_VERSION
     );
 
+    if ( is_post_type_archive( 'work' ) ) {
+        wp_enqueue_style(
+            'natsume_portfolio-works',
+            NATSUME_PORTFOLIO_URI . '/assets/css/works.css',
+            array( 'natsume_portfolio-main', 'natsume_portfolio-components' ),
+            NATSUME_PORTFOLIO_VERSION
+        );
+        wp_enqueue_script(
+            'natsume_portfolio-works',
+            NATSUME_PORTFOLIO_URI . '/assets/js/works.js',
+            array('natsume_portfolio-main'),
+            NATSUME_PORTFOLIO_VERSION,
+            true
+        );
+    }
+
+    if ( is_post_type_archive( 'skill' ) ) {
+        wp_enqueue_style(
+            'natsume_portfolio-skills',
+            NATSUME_PORTFOLIO_URI . '/assets/css/archive-skill.css',
+            array( 'natsume_portfolio-main', 'natsume_portfolio-components' ),
+            NATSUME_PORTFOLIO_VERSION
+        );
+        wp_enqueue_script(
+            'natsume_portfolio-skills',
+            NATSUME_PORTFOLIO_URI . '/assets/js/archive-skill.js',
+            array(),
+            NATSUME_PORTFOLIO_VERSION,
+            true
+        );
+    }
+
+    if ( is_singular( 'work' ) ) {
+        wp_enqueue_style(
+            'natsume_portfolio-single-work',
+            NATSUME_PORTFOLIO_URI . '/assets/css/single-work.css',
+            array( 'natsume_portfolio-main', 'natsume_portfolio-components' ),
+            NATSUME_PORTFOLIO_VERSION
+        );
+        wp_enqueue_script(
+            'natsume_portfolio-single-work',
+            NATSUME_PORTFOLIO_URI . '/assets/js/single-work.js',
+            array( 'natsume_portfolio-main' ),
+            NATSUME_PORTFOLIO_VERSION,
+            true
+        );
+    }
+
     // ─── Main JS ────────────────────────────────────────────────────
     wp_enqueue_script(
         'natsume_portfolio-main',
@@ -109,6 +157,15 @@ function natsume_portfolio_enqueue_assets() {
         'natsume_portfolio-scrolltrigger',
         'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js',
         array('natsume_portfolio-gsap'),
+        null,
+        true
+    );
+
+    // ─── Matter.js ────────────────────────────────────────────────────
+    wp_enqueue_script(
+        'matter-js',
+        'https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js',
+        array(),
         null,
         true
     );

@@ -1,43 +1,73 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
 
-  const sections = document.querySelectorAll("section");
-  const navLinks = document.querySelectorAll(".nav-links a");
+  const normalizePath = (path) => {
+    return path.replace(/\/+$/, '') || '/';
+  };
+
+  const currentPath = normalizePath(window.location.pathname);
+  const currentHash = window.location.hash.replace('#', '');
+
+  function getLinkInfo(link) {
+    const href = link.getAttribute('href');
+    if (!href) return null;
+
+    try {
+      const url = new URL(href, window.location.origin);
+      return {
+        path: normalizePath(url.pathname),
+        hash: url.hash.replace('#', ''),
+      };
+    } catch (error) {
+      return null;
+    }
+  }
 
   function setActiveLink() {
-    let current = "";
+    let activeId = currentHash || null;
+    let hasPathMatch = false;
 
-    // Check if we're on About page using URL
-    const currentPath = window.location.pathname;
-    const currentPage = window.location.href;
-    
-    if (currentPage.includes('/about/') || currentPath.includes('about') || document.body.classList.contains('page-template-about')) {
-      current = "about";
-    } else {
-      sections.forEach(section => {
-        const sectionTop = section.offsetTop - 150;
-        const sectionHeight = section.offsetHeight;
-
-        if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
-          current = section.getAttribute("id");
+    if (!activeId && currentPath === '/') {
+      sections.forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 150 && rect.bottom > 150) {
+          activeId = section.id;
         }
       });
     }
 
-    navLinks.forEach(link => {
-      link.classList.remove("active");
+    navLinks.forEach((link) => {
+      link.classList.remove('active');
+      const info = getLinkInfo(link);
+      if (!info) return;
 
-      const href = link.getAttribute("href");
+      if (info.hash && info.hash === activeId) {
+        link.classList.add('active');
+        return;
+      }
 
-      if (href === `#${current}` || href === `/#${current}`) {
-        link.classList.add("active");
+      if (currentPath !== '/' && info.path === currentPath) {
+        link.classList.add('active');
+        hasPathMatch = true;
+        return;
+      }
+
+      if (currentPath !== '/' && info.path !== '/' && currentPath.startsWith(info.path)) {
+        link.classList.add('active');
+        hasPathMatch = true;
+        return;
+      }
+
+      if (!hasPathMatch && currentPath === '/' && info.hash && info.hash === activeId) {
+        link.classList.add('active');
       }
     });
   }
 
-  // Set active link immediately on page load
   setActiveLink();
-  
-  // Update on scroll
-  window.addEventListener("scroll", setActiveLink);
 
+  if (window.location.pathname === '/' || window.location.pathname === '') {
+    window.addEventListener('scroll', setActiveLink);
+  }
 });

@@ -1,0 +1,708 @@
+:root {
+    --skills-bg: #0f0f10;
+    --skills-surface: #111315;
+    --skills-surface-soft: #191b1f;
+    --skills-border: rgba(255, 255, 255, 0.08);
+    --skills-text: #f7f6f5;
+    --skills-muted: #bdb7af;
+    --skills-accent: #ff7a00;
+    --skills-accent-soft: rgba(255, 122, 0, 0.16);
+}
+
+/* =========================
+   BASE
+========================= */
+
+.skills-portal {
+    background: var(--skills-bg);
+    color: var(--skills-text);
+    min-height: 100vh;
+    padding: 80px 20px;
+}
+
+.skills-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+section {
+    margin-bottom: 100px;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.skills-hero {
+    text-align: center;
+    max-width: 900px;
+    margin: 20px auto 100px;
+}
+
+.skills-hero h1 {
+    margin: 0;
+    font-size: clamp(3rem, 7vw, 5rem);
+    line-height: 1;
+    font-weight: 800;
+}
+
+.skills-hero p {
+    max-width: 700px;
+    margin: 24px auto 40px;
+    color: var(--skills-muted);
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+.skills-hero__tools {
+    margin-bottom: 40px;
+}
+
+.js-skills-search {
+    width: min(500px, 100%);
+    height: 56px;
+    padding: 0 20px;
+    border-radius: 14px;
+    border: 1px solid var(--skills-border);
+    background: var(--skills-surface);
+    color: white;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.js-skills-search:focus {
+    border-color: var(--skills-accent);
+}
+
+/* =========================
+   COUNTERS
+========================= */
+
+.skills-counters {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.skills-counters article {
+    background: var(--skills-surface);
+    border: 1px solid var(--skills-border);
+    border-radius: 18px;
+    padding: 30px;
+}
+
+.skills-counters strong {
+    display: block;
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--skills-accent);
+}
+
+.skills-counters span {
+    display: block;
+    margin-top: 8px;
+    color: var(--skills-muted);
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(5px);
+    transition:
+        opacity .55s ease,
+        transform .55s ease,
+        filter .55s ease;
+}
+
+.reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+
+    .skills-counters {
+        grid-template-columns: 1fr;
+    }
+
+    .skills-hero h1 {
+        font-size: 3rem;
+    }
+
+    section {
+        margin-bottom: 70px;
+    }
+}
+
+.stack-balls {
+    margin-bottom: 72px;
+}
+
+.stack-balls__stage {
+    position: relative;
+    height: 600px;
+    overflow: hidden;
+    border-radius: 20px;
+    border: 1px solid var(--skills-border);
+    background:
+        radial-gradient(circle at 20% 20%, rgba(255,122,0,.16), transparent 35%),
+        radial-gradient(circle at 78% 78%, rgba(255,170,98,.1), transparent 40%),
+        linear-gradient(180deg, rgba(14,15,19,.92), rgba(10,11,14,.94));
+    transition: box-shadow .2s ease;
+    touch-action: none;
+    box-shadow: inset 0 -30px 60px rgba(0,0,0,.35), inset 0 10px 25px rgba(255,255,255,.02);
+}
+
+.stack-balls__stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(60deg, rgba(255,255,255,.055) 0 2px, transparent 2px 26px),
+        repeating-linear-gradient(-60deg, rgba(255,255,255,.05) 0 2px, transparent 2px 26px);
+    opacity: .35;
+}
+
+.stack-balls__stage::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 24%;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,.35));
+}
+
+.stack-balls__stage.is-grabbing {
+    cursor: default;
+}
+
+.stack-ball:hover{
+    box-shadow:
+        0 16px 34px rgba(0,0,0,.4),
+        0 0 24px rgba(255,122,0,.35);
+}
+
+.skill-basketball {
+    position: relative;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.08);
+    background:
+        radial-gradient(circle at 28% 25%, rgba(255,255,255,.38), rgba(255,255,255,0) 42%),
+        radial-gradient(circle at 70% 78%, rgba(0,0,0,.2), rgba(0,0,0,0) 45%),
+        linear-gradient(145deg, #ff9a36 0%, #ff7a00 45%, #e56500 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    overflow: hidden;
+    text-shadow: 0 1px 2px rgba(0,0,0,.4);
+    box-shadow:
+        0 14px 24px rgba(0,0,0,.35),
+        0 20px 34px rgba(0,0,0,.22),
+        0 0 14px rgba(255,122,0,.25);
+}
+
+.skill-basketball::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: .92;
+    background:
+        radial-gradient(130% 130% at -10% 50%, transparent 58%, rgba(58,23,0,.62) 59.5%, transparent 62%),
+        radial-gradient(130% 130% at 110% 50%, transparent 58%, rgba(58,23,0,.62) 59.5%, transparent 62%),
+        radial-gradient(160% 100% at 50% -20%, transparent 63%, rgba(58,23,0,.56) 64.5%, transparent 67%),
+        radial-gradient(160% 100% at 50% 120%, transparent 63%, rgba(58,23,0,.56) 64.5%, transparent 67%);
+    mix-blend-mode: multiply;
+}
+
+.skill-basketball::after {
+    content: "";
+    position: absolute;
+    inset: 8% 10% auto 10%;
+    height: 26%;
+    border-radius: 50%;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0));
+}
+
+.stack-ball {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    z-index: 2;
+    cursor: pointer;
+    user-select: none;
+    overflow: visible;
+    padding: 12px;
+    will-change: transform;
+    transition: box-shadow .2s ease, filter .2s ease, transform .2s ease;
+}
+
+.stack-ball span{
+    position: relative;
+    z-index: 2;
+    pointer-events:none;
+    display: inline-block;
+    max-width: 94%;
+    line-height: 1.2;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(18,10,2,.28);
+    border: 1px solid rgba(255,255,255,.16);
+    font-weight: 800;
+    letter-spacing: .01em;
+    text-shadow: 0 1px 4px rgba(0,0,0,.58);
+    -webkit-backdrop-filter: blur(1px);
+    backdrop-filter: blur(1px);
+}
+
+.stack-ball.is-dragging {
+    cursor: pointer;
+    filter: brightness(1.05);
+    box-shadow:
+        0 18px 30px rgba(0,0,0,.42),
+        0 0 26px rgba(255,122,0,.45);
+}
+
+.stack-ball.is-selected {
+    border-color: color-mix(in srgb, var(--ball-accent, #ff7a00), #fff 28%);
+    box-shadow:
+        0 20px 34px rgba(0,0,0,.46),
+        0 0 32px color-mix(in srgb, var(--ball-accent, #ff7a00), transparent 58%),
+        0 0 0 2px color-mix(in srgb, var(--ball-accent, #ff7a00), transparent 66%);
+    filter: saturate(1.14) brightness(1.06);
+    transform: scale(1.06);
+}
+
+/* =========================
+   BALL INFO PANEL
+========================= */
+
+.balls-layout {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: 18px;
+}
+
+.balls-layout::before {
+    content: "";
+    position: absolute;
+    top: 16%;
+    bottom: 16%;
+    left: calc(68% + 9px);
+    width: 26px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--active-skill-accent, #ff7a00), transparent 50%), transparent);
+    filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+}
+
+.balls-layout.has-info::before {
+    opacity: .85;
+}
+
+.balls-stage-col {
+    width: 100%;
+    height: 600px;
+    transition: width .45s ease;
+}
+
+.ball-info-panel {
+    width: 0;
+    height: 600px;
+    opacity: 0;
+    transform: translateX(18px) scale(.985);
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid rgba(255,255,255,.05);
+    background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--panel-accent, #ff7a00), transparent 80%), transparent 38%),
+        radial-gradient(circle at bottom right, rgba(255,255,255,.05), transparent 42%),
+        linear-gradient(180deg, rgba(18,20,26,.94), rgba(11,12,16,.96));
+    padding: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    box-shadow:
+        0 24px 60px rgba(0,0,0,.42),
+        inset 0 1px 0 rgba(255,255,255,.04);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    transition: width .45s ease, opacity .3s ease, transform .45s ease, padding .45s ease, border-color .45s ease, box-shadow .45s ease;
+}
+
+.balls-layout.has-info .balls-stage-col {
+    width: 68%;
+}
+
+.balls-layout.has-info .ball-info-panel {
+    width: 32%;
+    min-width: 330px;
+    height: 600px;
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    padding: 20px;
+    border-color: color-mix(in srgb, var(--panel-accent, #ff7a00), rgba(255,255,255,.08) 68%);
+    box-shadow:
+        0 28px 72px rgba(0,0,0,.48),
+        0 0 0 1px rgba(255,255,255,.04),
+        0 0 30px color-mix(in srgb, var(--panel-accent, #ff7a00), transparent 84%);
+}
+
+.ball-info-panel__close {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    z-index: 3;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color: #fff;
+    border-radius: 999px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: .88rem;
+    letter-spacing: .01em;
+    box-shadow: 0 8px 22px rgba(0,0,0,.22);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+}
+
+.ball-info-panel__showcase {
+    display: grid;
+    place-items: center;
+    gap: 8px;
+    animation: skillFloat 5.8s ease-in-out infinite;
+}
+
+.ball-info-panel__showcase--compact {
+    width: 110px;
+    flex: 0 0 110px;
+}
+
+.ball-info-panel__ring {
+    position: relative;
+    width: min(100%, 110px);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    filter:
+        drop-shadow(0 0 18px color-mix(in srgb, var(--panel-accent, #ff7a00), transparent 58%))
+        drop-shadow(0 8px 18px rgba(0,0,0,.18));
+}
+
+.ball-info-panel__ring-track,
+.ball-info-panel__ring-progress {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+}
+
+.ball-info-panel__ring-track {
+    background:
+        radial-gradient(circle at center, transparent 60%, rgba(255,255,255,.08) 60.5%, rgba(255,255,255,.03) 67%, transparent 68%);
+}
+
+.ball-info-panel__ring-progress {
+    background:
+        conic-gradient(
+            from 210deg,
+            color-mix(in srgb, var(--panel-accent, #ff7a00), #fff 12%) 0 calc(var(--skill-progress, 0) * 1%),
+            rgba(255,255,255,.12) calc(var(--skill-progress, 0) * 1%) 100%
+        );
+    -webkit-mask: radial-gradient(circle, transparent 60%, #000 61%);
+    mask: radial-gradient(circle, transparent 60%, #000 61%);
+}
+
+.ball-info-panel__ball {
+    width: clamp(44px, 4vw, 58px);
+    height: clamp(44px, 4vw, 58px);
+    box-shadow:
+        0 14px 22px rgba(0,0,0,.28),
+        0 0 20px color-mix(in srgb, var(--panel-accent, #ff7a00), transparent 68%),
+        0 0 0 1px color-mix(in srgb, var(--panel-accent, #ff7a00), transparent 78%);
+}
+
+.ball-info-panel__hero-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+    justify-content: center;
+}
+
+.ball-info-panel__eyebrow {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: .56rem;
+    color: color-mix(in srgb, var(--panel-accent, #ff7a00), #fff 28%);
+}
+
+.ball-info-panel__hero-percent {
+    font-size: clamp(.9rem, 1vw, 1.05rem);
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -.04em;
+    color: #fff;
+    text-shadow: 0 8px 24px color-mix(in srgb, var(--panel-accent, #ff7a00), transparent 58%);
+}
+
+.ball-info-panel__section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    border-radius: 20px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,.06);
+    background: rgba(255,255,255,.03);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+.ball-info-panel__summary-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    width: 100%;
+}
+
+.ball-info-panel__summary-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.ball-info-panel__mini-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    width: 100%;
+}
+
+.ball-info-panel__mini-meta .ball-info-panel__detail {
+    gap: 4px;
+}
+
+.ball-info-panel__details-grid {
+    display: none;
+}
+
+.ball-info-panel__detail {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    text-align: left;
+}
+
+.ball-info-panel__detail--name {
+    grid-column: 1 / -1;
+}
+
+.ball-info-panel__detail span,
+.ball-info-panel__section-label {
+    display: block;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--skills-muted);
+}
+
+.ball-info-panel__detail strong,
+.ball-info-panel__title {
+    display: block;
+    margin: 0;
+    color: #fff;
+    line-height: 1.25;
+}
+
+.ball-info-panel__title {
+    font-size: clamp(1.05rem, 1.35vw, 1.35rem);
+    font-weight: 800;
+    letter-spacing: -.03em;
+}
+
+.ball-info-panel__badge {
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.ball-info-panel__category,
+.ball-info-panel__experience {
+    font-size: .82rem;
+    font-weight: 700;
+    color: color-mix(in srgb, #fff, var(--panel-accent, #ff7a00) 18%);
+}
+
+.ball-info-panel__description {
+    margin: 0;
+    color: var(--skills-muted);
+    line-height: 1.7;
+}
+
+.ball-info-panel__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+    align-items: flex-start;
+}
+
+.ball-info-panel__tags span {
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.05);
+    color: #fff;
+    font-size: .84rem;
+    font-weight: 600;
+    letter-spacing: .01em;
+    box-shadow: 0 10px 18px rgba(0,0,0,.12);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+.balls-layout.has-info .stack-balls__stage {
+    border-color: color-mix(in srgb, var(--active-skill-accent, #ff7a00), rgba(255,255,255,.08) 72%);
+    box-shadow:
+        inset 0 -30px 60px rgba(0,0,0,.35),
+        inset 0 10px 25px rgba(255,255,255,.02),
+        0 0 0 1px rgba(255,255,255,.02),
+        0 0 34px color-mix(in srgb, var(--active-skill-accent, #ff7a00), transparent 85%);
+}
+
+.balls-layout.has-info .stack-ball.is-selected {
+    box-shadow:
+        0 22px 38px rgba(0,0,0,.48),
+        0 0 36px color-mix(in srgb, var(--ball-accent, #ff7a00), transparent 48%),
+        0 0 0 2px color-mix(in srgb, var(--ball-accent, #ff7a00), transparent 58%);
+}
+
+.ball-info-panel__hero,
+.ball-info-panel__section {
+    flex: 0 0 auto;
+}
+
+.ball-info-panel__section--tags {
+    flex: 1 1 auto;
+    overflow-y: auto;
+}
+
+@keyframes skillFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@media (max-width: 1024px) {
+    .balls-layout {
+        flex-direction: column;
+    }
+
+    .balls-layout.has-info .balls-stage-col {
+        width: 100%;
+    }
+
+    .ball-info-panel {
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        max-height: 0;
+        padding: 0;
+        opacity: 0;
+        transform: translateY(12px) scale(.99);
+    }
+
+    .balls-layout.has-info .ball-info-panel {
+        width: 100%;
+        height: auto;
+        max-height: 1600px;
+        padding: 18px;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .balls-layout::before {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .ball-info-panel__showcase {
+        gap: 4px;
+    }
+
+    .ball-info-panel__showcase--compact {
+        width: 96px;
+        flex-basis: 96px;
+    }
+
+    .ball-info-panel__ring {
+        width: min(100%, 96px);
+    }
+
+    .ball-info-panel__ball {
+        width: clamp(38px, 14vw, 50px);
+        height: clamp(38px, 14vw, 50px);
+    }
+
+    .ball-info-panel__details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ball-info-panel__detail--name {
+        grid-column: auto;
+    }
+
+    .ball-info-panel__title {
+        font-size: 1rem;
+    }
+
+    .ball-info-panel__description {
+        font-size: .92rem;
+    }
+}

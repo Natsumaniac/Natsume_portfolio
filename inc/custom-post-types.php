@@ -108,7 +108,43 @@ function natsume_portfolio_register_taxonomies() {
         'rewrite'           => array( 'slug' => 'work-category' ),
         'show_in_rest'      => true,
         'show_admin_column' => true,
+        'show_ui'           => true,
     ) );
+
+    // ─── Work Tags ──────────────────────────────────────────────────
+    register_taxonomy( 'work_tag', 'work', array(
+        'labels' => array(
+            'name'          => __( 'Work Tags', 'natsume-portfolio' ),
+            'singular_name' => __( 'Work Tag', 'natsume-portfolio' ),
+            'search_items'  => __( 'Search Work Tags', 'natsume-portfolio' ),
+            'all_items'     => __( 'All Work Tags', 'natsume-portfolio' ),
+            'edit_item'     => __( 'Edit Work Tag', 'natsume-portfolio' ),
+            'add_new_item'  => __( 'Add New Work Tag', 'natsume-portfolio' ),
+            'new_item_name' => __( 'New Work Tag Name', 'natsume-portfolio' ),
+            'menu_name'     => __( 'Work Tags', 'natsume-portfolio' ),
+        ),
+        'public'            => true,
+        'hierarchical'      => false,
+        'rewrite'           => array( 'slug' => 'work-tag' ),
+        'show_in_rest'      => true,
+        'show_admin_column' => true,
+        'show_ui'           => true,
+    ) );
+
+    // Create default terms if they don't already exist.
+    $natsume_default_work_terms = array(
+        'Web System Development',
+        'Mobile App Development',
+        'Creative Writing',
+        'Video Editing',
+        'Graphic Design',
+    );
+
+    foreach ( $natsume_default_work_terms as $natsume_term ) {
+        if ( ! term_exists( $natsume_term, 'work_category' ) ) {
+            wp_insert_term( $natsume_term, 'work_category', array( 'slug' => sanitize_title( $natsume_term ) ) );
+        }
+    }
 
     // ─── Skill Category (e.g., Frontend, Backend, Tools) ────────────
     register_taxonomy( 'skill_category', 'skill', array(

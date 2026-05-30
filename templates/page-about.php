@@ -8,7 +8,7 @@
 get_header();
 ?>
 
-<section class="about-hero">
+<section class="about-hero" id="about-hero">
 
   <div class="mouth-smoke" aria-hidden="true"></div>
 
@@ -114,7 +114,7 @@ get_header();
      ABOUT INTRO SECTION
 ========================= -->
 
-<section class="about-intro-section">
+<section class="about-intro-section" id="about-intro">
 
   <!-- SECTION HEADER -->
   <div class="about-intro-header">
@@ -248,7 +248,7 @@ get_header();
      IDENTITY SECTION
 ========================= -->
 
-<section class="identity-section">
+<section class="identity-section" id="identity">
 
   <!-- BACKGROUND -->
   <div class="identity-bg">
@@ -513,7 +513,7 @@ get_header();
      DRIVES SECTION
 ========================= -->
 
-<section class="drives-section">
+<section class="drives-section" id="drives">
 
   <div class="drives-container">
 
@@ -625,7 +625,7 @@ get_header();
      BEYOND SECTION
 ========================= -->
 
-<section class="beyond-section">
+<section class="beyond-section" id="beyond">
 
   <div class="beyond-container">
 
@@ -956,7 +956,7 @@ get_header();
      QUOTE SECTION
 ========================= -->
 
-<section class="quote-section">
+<section class="quote-section" id="quote">
 
   <div class="quote-container">
 
