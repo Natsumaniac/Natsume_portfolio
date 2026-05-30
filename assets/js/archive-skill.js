@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const progressBars = document.querySelectorAll('.js-progress');
   const searchInput = document.querySelector('.js-skills-search');
   const categoryCards = document.querySelectorAll('[data-category-card]');
-  const keycaps = document.querySelectorAll('[data-key]');
-  const tooltip = document.querySelector('[data-key-tooltip]');
+  const developerKeyboard = document.querySelector('.js-developer-keyboard');
+  const tooltip = developerKeyboard?.querySelector('[data-key-tooltip]') || null;
   const timeline = document.querySelector('.journey-timeline');
 
   const revealObserver = new IntersectionObserver((entries) => {
@@ -58,23 +58,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  if (keycaps.length && tooltip) {
-    keycaps.forEach((key) => {
-      key.addEventListener('mouseenter', () => {
-        tooltip.innerHTML = '<strong>' + (key.dataset.tipTitle || '') + '</strong><em>' + (key.dataset.tipPercent || '0') + '% · ' + (key.dataset.tipProf || '') + '</em><small>' + (key.dataset.tipDesc || '') + '</small>';
-        const keyRect = key.getBoundingClientRect();
-        const wrapRect = key.parentElement.parentElement.getBoundingClientRect();
-        tooltip.style.left = Math.max(8, keyRect.left - wrapRect.left) + 'px';
-        tooltip.style.top = Math.max(8, keyRect.top - wrapRect.top - 96) + 'px';
-        tooltip.classList.add('is-visible');
-      });
-      key.addEventListener('mouseleave', () => tooltip.classList.remove('is-visible'));
-      key.addEventListener('click', () => {
-        key.classList.add('is-pressed');
-        setTimeout(() => key.classList.remove('is-pressed'), 160);
-      });
-    });
-  }
+  if (developerKeyboard && tooltip) initDeveloperKeyboard(developerKeyboard, tooltip);
+  initTechNetworkClusters();
+  initDeveloperWorkspace();
+  initSkillTreeTooltips();
 
   if (timeline) {
     const timeObserver = new IntersectionObserver((entries) => {
@@ -106,6 +93,114 @@ document.addEventListener('DOMContentLoaded', function () {
   const stage = document.querySelector('.js-balls-stage');
   if (stage) initBalls(stage, panelController, layoutRoot);
 });
+
+function escapeTooltipHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function positionFloatingTooltip(tooltip, target) {
+  const rect = target.getBoundingClientRect();
+  const tipRect = tooltip.getBoundingClientRect();
+  const margin = 12;
+  let left = rect.left + rect.width / 2 - tipRect.width / 2;
+  let top = rect.top - tipRect.height - 14;
+
+  left = Math.max(margin, Math.min(window.innerWidth - tipRect.width - margin, left));
+
+  if (top < margin) {
+    top = rect.bottom + 14;
+  }
+
+  top = Math.max(margin, Math.min(window.innerHeight - tipRect.height - margin, top));
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+}
+
+function initTechNetworkClusters() {
+  const clusters = document.querySelectorAll('.tech-cluster');
+  if (!clusters.length) return;
+
+  clusters.forEach((cluster) => {
+    const nodes = cluster.querySelectorAll('[data-network-node]');
+    const lines = cluster.querySelectorAll('[data-network-line]');
+
+    nodes.forEach((node) => {
+      const index = node.dataset.networkNode;
+      const line = cluster.querySelector(`[data-network-line="${index}"]`);
+
+      node.addEventListener('pointerenter', () => {
+        nodes.forEach((item) => item.classList.toggle('is-active', item === node));
+        lines.forEach((item) => item.classList.toggle('is-active', item === line));
+      });
+
+      node.addEventListener('pointerleave', () => {
+        nodes.forEach((item) => item.classList.remove('is-active'));
+        lines.forEach((item) => item.classList.remove('is-active'));
+      });
+    });
+  });
+}
+
+function initDeveloperWorkspace() {
+  const tools = document.querySelectorAll('[data-tool-item]');
+  const spotlight = document.querySelector('.js-workspace-spotlight');
+  const tooltip = document.querySelector('.js-workspace-tooltip');
+  if (!tools.length || !tooltip) return;
+
+  const defaultText = spotlight?.textContent || '';
+
+  tools.forEach((tool) => {
+    tool.addEventListener('pointerenter', () => {
+      const title = tool.dataset.toolTitle || 'Tool';
+      const proficiency = tool.dataset.toolProf || 'Workspace utility';
+
+      tools.forEach((item) => item.classList.toggle('is-active', item === tool));
+      if (spotlight) spotlight.textContent = `${title} · ${proficiency}`;
+      tooltip.innerHTML = `<strong>${escapeTooltipHtml(title)}</strong><span>${escapeTooltipHtml(proficiency)}</span>`;
+      tooltip.classList.add('is-visible');
+      requestAnimationFrame(() => positionFloatingTooltip(tooltip, tool));
+    });
+
+    tool.addEventListener('pointermove', () => positionFloatingTooltip(tooltip, tool));
+
+    tool.addEventListener('pointerleave', () => {
+      tool.classList.remove('is-active');
+      tooltip.classList.remove('is-visible');
+      if (spotlight) spotlight.textContent = defaultText;
+    });
+  });
+}
+
+function initSkillTreeTooltips() {
+  const nodes = document.querySelectorAll('[data-tree-node]');
+  const tooltip = document.querySelector('.js-skill-tree-tooltip');
+  if (!nodes.length || !tooltip) return;
+
+  nodes.forEach((node) => {
+    node.addEventListener('pointerenter', () => {
+      const title = node.dataset.treeTitle || 'Skill';
+      const year = node.dataset.treeYear || '';
+      const desc = node.dataset.treeDesc || 'Unlocked milestone';
+
+      nodes.forEach((item) => item.classList.toggle('is-active', item === node));
+      tooltip.innerHTML = `<strong>${escapeTooltipHtml(title)}</strong><span>${escapeTooltipHtml(year)}</span><p>${escapeTooltipHtml(desc)}</p>`;
+      tooltip.classList.add('is-visible');
+      requestAnimationFrame(() => positionFloatingTooltip(tooltip, node));
+    });
+
+    node.addEventListener('pointermove', () => positionFloatingTooltip(tooltip, node));
+
+    node.addEventListener('pointerleave', () => {
+      node.classList.remove('is-active');
+      tooltip.classList.remove('is-visible');
+    });
+  });
+}
 
 function initBallInfoPanel(layoutRoot, panelRoot, data) {
   const heroPercent = panelRoot.querySelector('.ball-info-panel__hero-percent');
@@ -232,6 +327,318 @@ function initBallInfoPanel(layoutRoot, panelRoot, data) {
       return activeId;
     }
   };
+}
+
+function initDeveloperKeyboard(keyboardRoot, tooltip) {
+  const keys = Array.from(keyboardRoot.querySelectorAll('[data-key]'));
+  if (!keys.length) return;
+
+  const supportsHover = window.matchMedia('(hover: hover)').matches && window.matchMedia('(pointer: fine)').matches;
+  const shell = keyboardRoot.querySelector('.keyboard-shell') || keyboardRoot;
+  const displayOutput = keyboardRoot.querySelector('.js-keyboard-display');
+  const portfolioAccent = getComputedStyle(shell).getPropertyValue('--keyboard-accent').trim() || '#ff7a00';
+  let activeTouchKey = null;
+  let hideTimeout = null;
+  let waveTimeout = null;
+  let waveTimers = [];
+  let currentCommand = '';
+  let terminalText = '';
+  let typeTimer = null;
+  let typeToken = 0;
+  const terminalPrompt = displayOutput?.dataset.prompt || 'visitor@natsume:~$ ';
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function clearTooltipTimer() {
+    if (hideTimeout) window.clearTimeout(hideTimeout);
+    hideTimeout = null;
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function hideTooltip(immediate = false) {
+    clearTooltipTimer();
+    tooltip.classList.remove('is-visible');
+    tooltip.classList.remove('is-below');
+    if (immediate) {
+      tooltip.style.left = '';
+      tooltip.style.top = '';
+    }
+    activeTouchKey = null;
+  }
+
+  function buildTooltipContent(key) {
+    const title = key.dataset.skillTitle || key.dataset.keyLabel || '';
+    const percent = parseInt(key.dataset.skillPercent || '0', 10);
+    const proficiency = key.dataset.skillProf || '';
+    const experience = key.dataset.skillExp || '';
+    const safePercent = clamp(Number.isFinite(percent) ? percent : 0, 0, 100);
+
+    tooltip.style.setProperty('--scan-progress', safePercent);
+
+    tooltip.innerHTML = `
+      <div class="scan-card" aria-label="Skill scan card">
+        <span class="scan-card__eyebrow">SKILL SCAN</span>
+        <strong>${escapeHtml(title).toUpperCase()}</strong>
+        <div class="scan-card__dial" aria-hidden="true">
+          <span>${safePercent}%</span>
+        </div>
+        <em>${escapeHtml(proficiency || 'Level')}</em>
+        <small>${escapeHtml(experience || 'Experience')}</small>
+      </div>
+    `;
+  }
+
+  function positionTooltip(key) {
+    const keyRect = key.getBoundingClientRect();
+    const tipRect = tooltip.getBoundingClientRect();
+    const margin = 12;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let left = keyRect.left + (keyRect.width / 2) - (tipRect.width / 2);
+    left = clamp(left, margin, viewportWidth - tipRect.width - margin);
+
+    let top = keyRect.top - tipRect.height - 14;
+    let below = false;
+    if (top < margin) {
+      top = keyRect.bottom + 14;
+      below = true;
+    }
+    if (top + tipRect.height > viewportHeight - margin) {
+      top = viewportHeight - tipRect.height - margin;
+      below = true;
+    }
+    top = clamp(top, margin, viewportHeight - tipRect.height - margin);
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    tooltip.classList.toggle('is-below', below);
+  }
+
+  function showTooltip(key) {
+    if (!key.dataset.skillId) return;
+    clearTooltipTimer();
+    buildTooltipContent(key);
+    tooltip.classList.add('is-visible');
+    requestAnimationFrame(() => positionTooltip(key));
+  }
+
+  function setKeyboardDisplay(value) {
+    if (!displayOutput) return;
+    terminalText = value;
+    displayOutput.textContent = terminalText;
+  }
+
+  function stopTyping() {
+    if (typeTimer) window.clearTimeout(typeTimer);
+    typeTimer = null;
+    typeToken++;
+  }
+
+  function typeFullDisplay(value, speed = 15) {
+    if (!displayOutput) return;
+
+    stopTyping();
+    const token = typeToken;
+    let index = 0;
+
+    function tick() {
+      if (token !== typeToken) return;
+      setKeyboardDisplay(value.slice(0, index));
+      index++;
+
+      if (index <= value.length) {
+        const character = value.charAt(index - 2);
+        const delay = character === '\n' ? speed * 6 : speed + Math.random() * 10;
+        typeTimer = window.setTimeout(tick, delay);
+      } else {
+        typeTimer = null;
+      }
+    }
+
+    tick();
+  }
+
+  function typeCommandAppend(value) {
+    if (!displayOutput || !value) return;
+
+    stopTyping();
+    const token = typeToken;
+    let index = 0;
+
+    function tick() {
+      if (token !== typeToken) return;
+      currentCommand += value.charAt(index);
+      setKeyboardDisplay(`${terminalPrompt}${currentCommand}`);
+      index++;
+
+      if (index < value.length) {
+        typeTimer = window.setTimeout(tick, 18 + Math.random() * 12);
+      } else {
+        typeTimer = null;
+      }
+    }
+
+    tick();
+  }
+
+  function getKeyOutputValue(key) {
+    const label = key.dataset.keyLabel || '';
+
+    if (key.dataset.skillTitle) return key.dataset.skillTitle;
+    if (label === 'Space') return ' ';
+    if (label === 'Enter') return '\n';
+    if (label === 'Tab') return '  ';
+    if (label === 'Backspace') return null;
+    if (['Shift', 'Caps Lock', 'Ctrl', 'Alt', 'Fn', 'Win', 'Menu', 'Num Lock', 'Scroll Lock', 'Print Screen', 'Pause Break'].includes(label)) {
+      return `[${label}]`;
+    }
+
+    return label;
+  }
+
+  function updateKeyboardDisplay(key) {
+    const label = key.dataset.keyLabel || '';
+    const outputValue = getKeyOutputValue(key);
+
+    if (key.dataset.skillTitle) {
+      const title = key.dataset.skillTitle || 'Skill';
+      const experience = key.dataset.skillExp || 'Experience not specified';
+      const proficiency = key.dataset.skillProf || 'Proficient';
+      const percent = key.dataset.skillPercent || '0';
+      const description = key.dataset.skillDesc || 'Developer skill';
+      const summary = description.split(/[.!?]/).filter(Boolean)[0] || description;
+      const response = `${terminalPrompt}${title}\n\nLoading skill data...\n${summary}\nExperience: ${experience}\nProficiency: ${proficiency}\nSkill Level: ${percent}%`;
+
+      currentCommand = title;
+      typeFullDisplay(response, 13);
+      return;
+    }
+
+    if (label === 'Backspace') {
+      stopTyping();
+      currentCommand = currentCommand.slice(0, -1);
+      setKeyboardDisplay(`${terminalPrompt}${currentCommand}`);
+    } else if (outputValue !== null) {
+      if (label === 'Enter') {
+        stopTyping();
+        setKeyboardDisplay(`${terminalPrompt}${currentCommand}\n${terminalPrompt}`);
+        currentCommand = '';
+      } else {
+        typeCommandAppend(outputValue);
+      }
+    }
+  }
+
+  function triggerWave(originKey) {
+    const originRect = originKey.getBoundingClientRect();
+    const originX = originRect.left + originRect.width / 2;
+    const originY = originRect.top + originRect.height / 2;
+    const waveSpeed = 3.6;
+
+    waveTimers.forEach((timer) => window.clearTimeout(timer));
+    waveTimers = [];
+
+    keys.forEach((key) => {
+      const rect = key.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const distance = Math.hypot(centerX - originX, centerY - originY);
+      const delay = Math.round(distance * waveSpeed);
+
+      key.style.setProperty('--wave-delay', `${delay}ms`);
+      key.classList.remove('is-waving');
+      void key.offsetWidth;
+      key.classList.add('is-waving');
+      waveTimers.push(window.setTimeout(() => key.classList.add('is-lit'), delay + 140));
+    });
+
+    shell.classList.add('is-rippling');
+    shell.classList.add('has-ambient-light');
+    if (waveTimeout) window.clearTimeout(waveTimeout);
+    const furthestDelay = Math.max(...keys.map((key) => parseInt(key.style.getPropertyValue('--wave-delay') || '0', 10)));
+    waveTimeout = window.setTimeout(() => {
+      keys.forEach((key) => {
+        key.classList.remove('is-waving', 'is-pressed');
+        key.style.removeProperty('--wave-delay');
+      });
+      shell.classList.remove('is-rippling');
+      waveTimeout = null;
+    }, furthestDelay + 1300);
+  }
+
+  function handleKeyActivation(key, event) {
+    event.preventDefault();
+    if (!supportsHover && key.dataset.skillId) {
+      activeTouchKey = key;
+    }
+
+    keys.forEach((item) => {
+      if (item !== key) item.classList.remove('is-active');
+    });
+
+    key.classList.add('is-pressed');
+    key.classList.add('is-lit', 'is-active');
+
+    updateKeyboardDisplay(key);
+    triggerWave(key);
+
+    window.setTimeout(() => {
+      key.classList.remove('is-pressed');
+    }, 240);
+
+    if (!supportsHover && key.dataset.skillId) {
+      showTooltip(key);
+    }
+  }
+
+  keys.forEach((key) => {
+    key.style.setProperty('--skill-accent', portfolioAccent);
+
+    if (supportsHover && key.dataset.skillId) {
+      key.addEventListener('pointerenter', () => showTooltip(key));
+      key.addEventListener('pointermove', () => positionTooltip(key));
+      key.addEventListener('pointerleave', () => {
+        if (activeTouchKey !== key) hideTooltip();
+      });
+    }
+
+    key.addEventListener('click', (event) => {
+      handleKeyActivation(key, event);
+    });
+  });
+
+  setKeyboardDisplay(terminalPrompt);
+
+  document.addEventListener('pointerdown', (event) => {
+    if (!keyboardRoot.contains(event.target)) {
+      hideTooltip(true);
+      return;
+    }
+
+    if (!supportsHover) {
+      const tappedKey = event.target.closest('[data-key]');
+      if (!tappedKey || !tappedKey.dataset.skillId) {
+        hideTooltip(true);
+      }
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (tooltip.classList.contains('is-visible') && activeTouchKey) {
+      positionTooltip(activeTouchKey);
+    }
+  });
 }
 
 function initBalls(stage, panelController, layoutRoot) {

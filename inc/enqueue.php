@@ -59,6 +59,14 @@ function natsume_portfolio_enqueue_assets() {
         NATSUME_PORTFOLIO_VERSION
     );
 
+    // ─── Premium Cursor Trail ────────────────────────────────────────
+    wp_enqueue_style(
+        'natsume_portfolio-cursor-trail',
+        NATSUME_PORTFOLIO_URI . '/assets/css/cursor-trail.css',
+        array( 'natsume_portfolio-main' ),
+        NATSUME_PORTFOLIO_VERSION
+    );
+
     if ( is_post_type_archive( 'work' ) ) {
         wp_enqueue_style(
             'natsume_portfolio-works',
@@ -129,6 +137,15 @@ function natsume_portfolio_enqueue_assets() {
     wp_enqueue_script(
         'natsume_portfolio-nav-active',
         NATSUME_PORTFOLIO_URI . '/assets/js/nav-active.js',
+        array(),
+        NATSUME_PORTFOLIO_VERSION,
+        true
+    );
+
+    // ─── Premium Cursor Trail JS ─────────────────────────────────────
+    wp_enqueue_script(
+        'natsume_portfolio-cursor-trail',
+        NATSUME_PORTFOLIO_URI . '/assets/js/cursor-trail.js',
         array(),
         NATSUME_PORTFOLIO_VERSION,
         true
