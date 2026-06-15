@@ -16,11 +16,10 @@ $loop_video = get_field('loop_video');
 $greeting   = get_field('hero_greeting') ?: 'Hello';
 $name       = get_field( 'hero_name' ) ?: get_bloginfo( 'name' );
 $desc       = get_field( 'hero_description' );
-$resume = get_field('hero_resume');
 $hero_btn_text1 = get_field('hero_button_text1') ?: 'Behind the Name';
 $hero_btn_text2 = get_field('hero_button_text2') ?: 'View Resume';
 $about_btn_text = get_field('about_button_text') ?: 'The Story Behind Natsume';
-$hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume'));
+$hero_resume_url = esc_url( natsume_portfolio_get_resume_viewer_url() );
 ?>
 
 <!-- HERO SECTION -->
@@ -61,13 +60,13 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
     <div class="hero-buttons">
 
       <a href="#about" class="btn-premium hero-secondary">
-        <?php echo esc_html($hero_btn_text1); ?>
         <i class="fa-solid fa-user-secret"></i>
+        <?php echo esc_html($hero_btn_text1); ?>
       </a>
 
-      <a href="<?php echo $hero_resume_url; ?>" class="btn-premium hero-primary">
-        <?php echo esc_html($hero_btn_text2); ?>
+      <a href="<?php echo $hero_resume_url; ?>" class="btn-premium hero-primary" target="_blank" rel="noopener noreferrer">
         <i class="fa-solid fa-file-lines"></i>
+        <?php echo esc_html($hero_btn_text2); ?>
       </a>
 
     </div>
@@ -136,15 +135,17 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
         </div>
 
     <div class="about-buttons">
-      <a href="<?php echo esc_url(home_url('/about')); ?>" class="btn-premium">
-          <?php echo esc_html($about_btn_text); ?>
+    <a href="<?php echo esc_url(home_url('/about')); ?>" class="btn-premium">
           <i class="fa-solid fa-book-open"></i>
+          <?php echo esc_html($about_btn_text); ?>
       </a>
     </div>
   </div>
   </div>
 
 </section>
+
+<?php natsume_portfolio_render_section_transition( 'section-transition--angle' ); ?>
 
 <!-- WORKS SECTION -->
 <section class="works-section" id="works">
@@ -177,14 +178,24 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
           $work_image = get_the_post_thumbnail_url(get_the_ID(), 'large');
       ?>
 
-      <div class="work-item">
+      <a
+        href="<?php the_permalink(); ?>"
+        class="work-item"
+        aria-label="<?php echo esc_attr( get_the_title() ); ?>"
+      >
 
         <?php if ($work_image): ?>
 
           <img
             src="<?php echo esc_url($work_image); ?>"
-            alt="<?php the_title(); ?>"
+            alt="<?php echo esc_attr( get_the_title() ); ?>"
           >
+
+        <?php else: ?>
+
+          <span class="work-item__placeholder" aria-hidden="true">
+            <i class="fa-solid fa-diagram-project"></i>
+          </span>
 
         <?php endif; ?>
 
@@ -192,13 +203,17 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
           <?php the_title(); ?>
         </div>
 
-      </div>
+      </a>
 
       <?php
         endwhile;
 
         wp_reset_postdata();
 
+      else :
+      ?>
+        <div class="works-empty">No projects available yet.</div>
+      <?php
       endif;
       ?>
 
@@ -214,11 +229,13 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
     href="<?php echo get_post_type_archive_link('work'); ?>"
     class="btn-premium works-btn"
   >
-    <?php echo esc_html($works_btn_text); ?>
     <i class="fas fa-up-right-from-square"></i>
+    <?php echo esc_html($works_btn_text); ?>
   </a>
 
 </section>
+
+<?php natsume_portfolio_render_section_transition( 'section-transition--circuit' ); ?>
 
 <!-- SKILLS SECTION -->
 <section class="skills-section" id="skills">
@@ -251,17 +268,20 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
     <?php
     $skills = new WP_Query(array(
       'post_type'      => 'skill',
-      'posts_per_page' => 8,
-      'meta_key'       => 'skill_order',
-      'orderby'        => 'meta_value_num',
-      'order'          => 'ASC',
+      'posts_per_page' => -1,
+      'orderby'        => 'date',
+      'order'          => 'DESC',
     ));
+
+    $all_skill_items = array();
+
     if ($skills->have_posts()) :
       while ($skills->have_posts()) :
         $skills->the_post();
+        $skill_id = get_the_ID();
         $skill_name  = get_the_title();
-        $skill_level = get_field('skill_percentage') ?: 50;
-        $skill_icon  = get_field('skill_icon');
+        $skill_level = get_field('skill_percentage', $skill_id) ?: 50;
+        $skill_icon  = get_field('skill_icon', $skill_id);
         $skill_icon_class = '';
         $skill_key = strtolower(trim($skill_name));
 
@@ -274,6 +294,43 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
         } elseif (stripos($skill_key, 'react') !== false) {
           $skill_icon_class = 'fa-brands fa-react';
         }
+
+        // Additional icon fallbacks for specific skill names
+        if (stripos($skill_key, 'creative') !== false || stripos($skill_key, 'media') !== false || stripos($skill_key, 'edit') !== false) {
+          $skill_icon_class = $skill_icon_class ?: 'fa-solid fa-film';
+        } elseif (stripos($skill_key, 'interactive') !== false || stripos($skill_key, 'animation') !== false) {
+          $skill_icon_class = $skill_icon_class ?: 'fa-solid fa-magic';
+        }
+
+        $skill_card = array(
+          'id' => $skill_id,
+          'name' => $skill_name,
+          'level' => intval($skill_level),
+          'icon' => $skill_icon,
+          'icon_class' => $skill_icon_class,
+          'featured' => (bool) get_field('featured_skill', $skill_id),
+          'hero' => (bool) get_field('hero_skill', $skill_id),
+        );
+
+        $all_skill_items[] = $skill_card;
+      endwhile;
+      wp_reset_postdata();
+    endif;
+
+    // Sort by highest percentage first
+    usort($all_skill_items, function($a, $b) {
+      return $b['level'] - $a['level'];
+    });
+
+    // Show top 5 skills
+    $skills_preview = array_slice($all_skill_items, 0, 5 );
+
+    if (!empty($skills_preview)) :
+      foreach ($skills_preview as $skill_item) :
+        $skill_name  = $skill_item['name'];
+        $skill_level = $skill_item['level'];
+        $skill_icon  = $skill_item['icon'];
+        $skill_icon_class = $skill_item['icon_class'];
     ?>
       <div class="skill">
         <!-- TOP -->
@@ -307,8 +364,11 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
         </div>
       </div>
     <?php
-      endwhile;
-      wp_reset_postdata();
+      endforeach;
+    else :
+    ?>
+      <div class="skills-empty">No skills available yet.</div>
+    <?php
     endif;
     ?>
   </div>
@@ -320,10 +380,12 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
     href="<?php echo get_post_type_archive_link('skill'); ?>" 
     class="btn-premium skills-btn"
   >
-    <?php echo esc_html($skills_btn_text); ?>
     <i class="fas fa-arrow-right"></i>
+    <?php echo esc_html($skills_btn_text); ?>
   </a>
 </section>
+
+<?php natsume_portfolio_render_section_transition( 'section-transition--scan' ); ?>
 
 <!-- CERTIFICATES SECTION -->
 <section class="cert-section" id="certificates">
@@ -404,8 +466,8 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
         href="<?php echo get_post_type_archive_link('certificate'); ?>"
         class="cert-button-card btn-premium"
       >
-        <?php echo esc_html($certificate_button_text); ?>
         <i class="fas fa-arrow-right"></i>
+        <?php echo esc_html($certificate_button_text); ?>
       </a>
 
     </div>
@@ -413,6 +475,8 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
   </div>
 
 </section>
+
+<?php natsume_portfolio_render_section_transition( 'section-transition--coordinate' ); ?>
 
 <!-- CTA SECTION -->
 <section class="cta-section" id="cta">
@@ -499,10 +563,8 @@ $hero_resume_url = $resume ? esc_url($resume['url']) : esc_url(home_url('/resume
 
         target="<?php echo esc_attr($cta_btn['target']); ?>"
       >
-
-        <?php echo esc_html($cta_btn_text); ?>
-
         <i class="fas fa-up-right-from-square"></i>
+        <?php echo esc_html($cta_btn_text); ?>
 
       </a>
 

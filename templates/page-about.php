@@ -244,6 +244,8 @@ get_header();
 
 </section>
 
+<?php natsume_portfolio_render_section_transition( 'section-transition--coordinate' ); ?>
+
 <!-- =========================
      IDENTITY SECTION
 ========================= -->
@@ -488,17 +490,17 @@ get_header();
 
       <!-- BUTTON -->
       <?php 
-      $resume = get_field('resume_file');
+      $resume = natsume_portfolio_get_resume_file_data();
 
-      if ($resume): ?>
+      if ( ! empty( $resume['url'] ) ): ?>
 
         <a
-          href="<?php echo esc_url($resume['url']); ?>"
+          href="<?php echo esc_url( natsume_portfolio_get_resume_viewer_url() ); ?>"
           class="btn-premium hero-secondary resume-btn"
-          download
+          target="_blank" rel="noopener noreferrer"
         >
-          <?php echo esc_html(get_field('resume_button_text')); ?>
           <i class="fa-solid fa-download"></i>
+          <?php echo esc_html(get_field('resume_button_text')); ?>
         </a>
 
       <?php endif; ?>
@@ -508,6 +510,8 @@ get_header();
   </div>
 
 </section>
+
+<?php natsume_portfolio_render_section_transition( 'section-transition--circuit' ); ?>
 
 <!-- =========================
      DRIVES SECTION
@@ -620,6 +624,8 @@ get_header();
   </div>
 
 </section>
+
+<?php natsume_portfolio_render_section_transition( 'section-transition--angle' ); ?>
 
 <!-- =========================
      BEYOND SECTION
@@ -951,6 +957,8 @@ get_header();
   </div>
 
 </section>
+
+<?php natsume_portfolio_render_section_transition( 'section-transition--scan' ); ?>
 
 <!-- =========================
      QUOTE SECTION

@@ -1,67 +1,364 @@
 /* =========================
-   🔥 GLOBAL BUTTON (REUSABLE)
+   🔥 MASTER BUTTON SYSTEM
 ========================= */
-.btn-premium {
-  padding: 12px 28px;
-  border: 1px solid #ff7a00;
+.btn-premium,
+.btn,
+.btn--ghost,
+.contact-terminal__button,
+.certificate-vault__button,
+.works-filter-btn,
+.summary-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 122, 0, 0.9);
+  background: rgba(255, 255, 255, 0.04);
   color: #ff7a00;
   text-decoration: none;
-  font-size: 12px;
-  letter-spacing: 1px;
+  font-size: 0.92rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
   position: relative;
   overflow: hidden;
-  display: inline-flex;         
-  align-items: center;
-  gap: 10px;                   
-  transition: 0.3s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 32px rgba(255, 122, 0, 0.12);
+  transition: background-color 0.35s ease-out, color 0.35s ease-out, border-color 0.35s ease-out, box-shadow 0.35s ease-out;
 }
 
-/* ICON */
-.btn-premium i {
-  font-size: 12px;
-  transition: 0.3s ease;
+.btn-premium i,
+.btn i,
+.btn--ghost i,
+.contact-terminal__button i,
+.certificate-vault__button i,
+.works-filter-btn i,
+.summary-toggle i {
+  font-size: 1em;
+  transition: transform 0.35s ease-out, color 0.35s ease-out;
 }
 
-/* ICON ANIMATION */
-.btn-premium:hover i {
-  transform: translateX(5px); 
+.btn-premium:hover i,
+.btn:hover i,
+.btn--ghost:hover i,
+.contact-terminal__button:hover i,
+.certificate-vault__button:hover i,
+.works-filter-btn:hover i,
+.summary-toggle:hover i {
+  transform: translateX(4px);
 }
 
-/* =========================
-   SHINE EFFECT
-========================= */
-.btn-premium::before {
+.btn-premium::before,
+.btn::before,
+.btn--ghost::before,
+.contact-terminal__button::before,
+.certificate-vault__button::before,
+.works-filter-btn::before,
+.summary-toggle::before {
   content: "";
   position: absolute;
   top: 0;
-  left: -75%;
-  width: 50%;
+  left: -90%;
+  width: 40%;
   height: 100%;
-
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255,255,255,0.6),
-    transparent
-  );
-
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.55), transparent);
   transform: skewX(-25deg);
+  opacity: 0.5;
+  transition: transform 0.35s ease-out, left 0.35s ease-out;
 }
 
-/* SHINE ANIMATION */
-.btn-premium:hover::before {
-  animation: shine 0.8s ease forwards;
+.btn-premium:hover::before,
+.btn:hover::before,
+.btn--ghost:hover::before,
+.contact-terminal__button:hover::before,
+.certificate-vault__button:hover::before,
+.works-filter-btn:hover::before,
+.summary-toggle:hover::before {
+  animation: shine 0.8s ease-out forwards;
 }
 
 @keyframes shine {
-  100% { left: 125%; }
+  100% {
+    left: 125%;
+  }
+}
+
+.btn-premium:hover,
+.btn:hover,
+.btn--ghost:hover,
+.contact-terminal__button:hover,
+.certificate-vault__button:hover,
+.works-filter-btn:hover,
+.summary-toggle:hover {
+  background: #ff7a00;
+  color: #000;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 46px rgba(255, 138, 0, 0.24), 0 0 28px rgba(255, 179, 71, 0.24);
+}
+
+.btn-premium:focus-visible,
+.btn:focus-visible,
+.btn--ghost:focus-visible,
+.contact-terminal__button:focus-visible,
+.certificate-vault__button:focus-visible,
+.works-filter-btn:focus-visible,
+.summary-toggle:focus-visible {
+  outline: 2px solid rgba(255, 190, 120, 0.65);
+  outline-offset: 4px;
+}
+
+.btn-premium--small,
+.btn--small {
+  min-height: 40px;
+  padding: 0 18px;
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+}
+
+.btn-premium--medium,
+.btn--medium {
+  min-height: 52px;
+  padding: 0 24px;
+}
+
+.btn-premium--large,
+.btn--large {
+  min-height: 60px;
+  padding: 0 32px;
+  font-size: 1rem;
+}
+
+.btn-premium.hero-primary,
+.btn.hero-primary,
+button[class*="hero-primary"] {
+  background: linear-gradient(125deg, #d94f00 0%, #ff7a00 54%, #ffb347 100%);
+  color: #111;
+  border-color: rgba(255, 190, 120, 0.55);
+}
+
+.btn-premium.hero-primary:hover,
+.btn.hero-primary:hover,
+button[class*="hero-primary"]:hover {
+  color: #000;
+  border-color: rgba(255, 220, 170, 0.75);
+}
+
+.btn-premium.hero-secondary,
+.btn.hero-secondary,
+button[class*="hero-secondary"] {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: #ff7a00;
+  color: #ff7a00;
+}
+
+.btn-premium.hero-secondary:hover,
+.btn.hero-secondary:hover,
+button[class*="hero-secondary"]:hover {
+  background: #ff7a00;
+  color: #000;
+  border-color: rgba(255, 179, 71, 0.72);
+}
+
+.btn-premium.btn--ghost,
+.btn.btn--ghost,
+button[class*="btn--ghost"],
+a[class*="btn--ghost"] {
+  background: rgba(255, 255, 255, 0.03);
+  color: #ff7a00;
+  border-color: rgba(255, 122, 0, 0.24);
+}
+
+.btn-premium.btn--ghost:hover,
+.btn.btn--ghost:hover,
+button[class*="btn--ghost"]:hover,
+a[class*="btn--ghost"]:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ff7a00;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.btn-premium > i:first-child,
+.btn > i:first-child,
+.btn--ghost > i:first-child,
+.contact-terminal__button > i:first-child,
+.certificate-vault__button > i:first-child,
+.works-filter-btn > i:first-child,
+.summary-toggle > i:first-child {
+  order: -1;
 }
 
 /* =========================
-   HOVER STATE
+   SECTION TRANSITIONS
 ========================= */
-.btn-premium:hover {
-  background: #ff7a00;
-  color: #000;
-  box-shadow: 0 0 15px rgba(255,122,0,0.5);
+.section-transition {
+  --transition-accent: #ff7a00;
+  --transition-accent-soft: rgba(255, 122, 0, 0.14);
+  --transition-line: rgba(255, 122, 0, 0.24);
+  --transition-muted: rgba(255, 255, 255, 0.08);
+  --transition-dash: rgba(255, 122, 0, 0.18);
+  --transition-center: rgba(255, 179, 71, 0.16);
+  --transition-node-border: rgba(255, 179, 71, 0.52);
+  --transition-node-bg: rgba(255, 122, 0, 0.34);
+  --transition-node-glow: rgba(255, 122, 0, 0.38);
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(24px, 1fr) auto minmax(24px, 1fr);
+  align-items: center;
+  gap: clamp(10px, 1.2vw, 16px);
+  width: min(760px, calc(100% - 48px));
+  height: 0;
+  min-height: 0;
+  margin: 0 auto;
+  isolation: isolate;
+  opacity: 0.78;
+  overflow: visible;
+  transform: translateY(-50%);
+}
+
+.section-transition::before,
+.section-transition::after {
+  content: "";
+  position: absolute;
+  left: clamp(10px, 2vw, 24px);
+  right: clamp(10px, 2vw, 24px);
+  pointer-events: none;
+}
+
+.section-transition::before {
+  top: 50%;
+  height: 1px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 18px, var(--transition-dash) 18px 20px, transparent 20px 38px),
+    linear-gradient(90deg, transparent, var(--transition-line), transparent);
+  opacity: 0.55;
+  transform: translateY(-50%);
+}
+
+.section-transition::after {
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--transition-center), transparent);
+  opacity: 0.42;
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  transform: translateY(-50%);
+}
+
+.section-transition__rail {
+  position: relative;
+  display: block;
+  height: 1px;
+  background:
+    linear-gradient(90deg, transparent, var(--transition-line)) 0 50% / 52% 1px no-repeat,
+    linear-gradient(90deg, var(--transition-muted), transparent) 72% 50% / 28% 1px no-repeat;
+  box-shadow: 0 0 10px var(--transition-accent-soft);
+}
+
+.section-transition__rail--right {
+  transform: scaleX(-1);
+}
+
+.section-transition__rail::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 58%;
+  width: clamp(18px, 3vw, 32px);
+  height: 1px;
+  background: var(--transition-dash);
+  transform: translateY(-50%);
+}
+
+.section-transition__node {
+  position: relative;
+  display: grid;
+  width: 7px;
+  height: 7px;
+  place-items: center;
+  border: 1px solid var(--transition-node-border);
+  border-radius: 50%;
+  background: var(--transition-node-bg);
+  box-shadow:
+    0 0 12px var(--transition-node-glow),
+    0 0 22px rgba(255, 122, 0, 0.12);
+}
+
+.section-transition--angle .section-transition__node {
+  border-radius: 2px;
+}
+
+.section-transition--circuit .section-transition__rail {
+  background:
+    linear-gradient(90deg, var(--transition-line), var(--transition-line)) 0 50% / 32% 1px no-repeat,
+    linear-gradient(90deg, var(--transition-line), var(--transition-line)) 44% 50% / 18% 1px no-repeat,
+    linear-gradient(90deg, var(--transition-muted), var(--transition-muted)) 74% 50% / 18% 1px no-repeat;
+}
+
+.section-transition--circuit .section-transition__rail::before {
+  background: var(--transition-dash);
+}
+
+.section-transition--scan::before {
+  background:
+    repeating-linear-gradient(90deg, var(--transition-dash) 0 7px, transparent 7px 16px),
+    linear-gradient(90deg, transparent, var(--transition-center), transparent);
+}
+
+.section-transition--coordinate .section-transition__node {
+  background: var(--transition-node-bg);
+}
+
+.home .section-transition,
+.front-page .section-transition,
+.page-template-about .section-transition {
+  --transition-accent-soft: rgba(255, 122, 0, 0.22);
+  --transition-line: rgba(255, 122, 0, 0.42);
+  --transition-muted: rgba(255, 179, 71, 0.16);
+  --transition-dash: rgba(255, 122, 0, 0.32);
+  --transition-center: rgba(255, 179, 71, 0.26);
+  --transition-node-border: rgba(255, 179, 71, 0.62);
+  --transition-node-bg: rgba(255, 122, 0, 0.48);
+  --transition-node-glow: rgba(255, 122, 0, 0.48);
+  opacity: 0.86;
+}
+
+.home .section-transition,
+.front-page .section-transition,
+.page-template-about .section-transition,
+.contact-terminal > .section-transition {
+  width: min(760px, calc(100% - 48px));
+}
+
+.skills-portal .skills-container > section {
+  margin-bottom: 0;
+}
+
+.skills-portal .section-transition {
+  width: min(760px, 100%);
+  margin: 0 auto;
+}
+
+.contact-terminal > .section-transition {
+  min-height: 0;
+}
+
+@media (max-width: 700px) {
+  .section-transition {
+    grid-template-columns: minmax(18px, 1fr) auto minmax(18px, 1fr);
+    gap: 10px;
+    width: calc(100% - 28px);
+    min-height: 0;
+  }
+
+  .section-transition__rail::before {
+    left: 34%;
+  }
+
+  .section-transition__node {
+    width: 6px;
+    height: 6px;
+  }
 }

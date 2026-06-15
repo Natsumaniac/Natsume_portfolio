@@ -1,171 +1,202 @@
-(function () {
-  const canUseTrail = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+﻿(function () {
+  const canUseParticles = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (!canUseTrail || reduceMotion) return;
+  if (!canUseParticles || reduceMotion) return;
 
-  const PARTICLE_COUNT = 9;
-  const PULSE_COUNT = 7;
-  const PULSE_DISTANCE = 44;
-  const IDLE_FADE_DELAY = 120;
-
+  const MAX_PARTICLES = 220;
+  const colors = ['#ff9d00', '#ffb84d', '#ffcc66', 'rgba(255,165,0,0.5)'];
   const field = document.createElement('div');
-  field.className = 'cursor-energy-field';
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d', { alpha: true });
+
+  if (!context) return;
+
+  field.className = 'cursor-energy-field cursor-energy-field--particles';
   field.setAttribute('aria-hidden', 'true');
+  canvas.className = 'cursor-particle-canvas';
+  field.appendChild(canvas);
 
   const particles = [];
-  const pulses = [];
-  const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-  let lastPointer = { ...pointer };
-  let lastPulse = { ...pointer };
-  let lastMoveAt = 0;
-  let hasPointer = false;
-  let pulseIndex = 0;
-  let rafId = null;
+  let width = 0;
+  let height = 0;
+  let pixelRatio = 1;
+  let animationFrame = null;
+  let lastX = window.innerWidth * 0.5;
+  let lastY = window.innerHeight * 0.5;
+  let lastTimestamp = 0;
 
-  function createParticle(index) {
-    const element = document.createElement('span');
-    const size = 5 + (index % 5) * 1.45;
-    const blur = index % 3 === 0 ? 0.7 : 0.25;
+  function random(min, max) {
+    return min + Math.random() * (max - min);
+  }
 
-    element.className = 'cursor-energy-particle';
-    element.style.setProperty('--particle-size', `${size}px`);
-    element.style.setProperty('--particle-blur', `${blur}px`);
-    field.appendChild(element);
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function parseColor(color) {
+    if (color.startsWith('#')) {
+      const hex = color.slice(1);
+      const shorthand = hex.length === 3;
+      const r = parseInt(shorthand ? hex[0] + hex[0] : hex.slice(0, 2), 16);
+      const g = parseInt(shorthand ? hex[1] + hex[1] : hex.slice(2, 4), 16);
+      const b = parseInt(shorthand ? hex[2] + hex[2] : hex.slice(4, 6), 16);
+      return { r, g, b, a: 1 };
+    }
+
+    const rgbaMatch = color.match(/rgba\((\d+),(\d+),(\d+),(\d*\.?\d+)\)/);
+    if (rgbaMatch) {
+      return {
+        r: parseInt(rgbaMatch[1], 10),
+        g: parseInt(rgbaMatch[2], 10),
+        b: parseInt(rgbaMatch[3], 10),
+        a: parseFloat(rgbaMatch[4])
+      };
+    }
+
+    const rgbMatch = color.match(/rgb\((\d+),(\d+),(\d+)\)/);
+    if (rgbMatch) {
+      return { r: parseInt(rgbMatch[1], 10), g: parseInt(rgbMatch[2], 10), b: parseInt(rgbMatch[3], 10), a: 1 };
+    }
+
+    return { r: 255, g: 157, b: 0, a: 1 };
+  }
+
+  function resizeCanvas() {
+    pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth;
+    height = window.innerHeight;
+
+    canvas.width = Math.ceil(width * pixelRatio);
+    canvas.height = Math.ceil(height * pixelRatio);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+  }
+
+  function createParticle(x, y, movement) {
+    const color = colors[Math.floor(random(0, colors.length))];
+    const angle = random(0, Math.PI * 2);
+    const speed = clamp(movement * 0.02 + random(0.3, 1.1), 0.3, 2.8);
+    const baseRadius = random(1.2, 3.2);
 
     return {
-      element,
-      x: pointer.x,
-      y: pointer.y,
-      size,
-      opacity: 0,
-      drift: (index - PARTICLE_COUNT / 2) * 0.18,
-      ease: 0.16 - Math.min(index * 0.009, 0.075)
+      x,
+      y,
+      vx: Math.cos(angle) * speed + random(-0.3, 0.3),
+      vy: Math.sin(angle) * speed + random(-0.3, 0.3) - 0.15,
+      radius: baseRadius,
+      baseRadius,
+      alpha: random(0.55, 0.94),
+      life: 0,
+      ttl: random(900, 1700),
+      color,
+      glow: Math.random() > 0.75,
+      pulsePhase: random(0, Math.PI * 2)
     };
   }
 
-  function createPulse() {
-    const element = document.createElement('span');
-    element.className = 'cursor-energy-pulse';
-    field.appendChild(element);
+  function spawnParticles(x, y, movement) {
+    const count = clamp(Math.round(movement * 0.085) + 1, 1, 10);
 
-    return {
-      element,
-      x: pointer.x,
-      y: pointer.y,
-      age: 1,
-      size: 30
-    };
-  }
-
-  function setup() {
-    for (let index = 0; index < PARTICLE_COUNT; index++) {
-      particles.push(createParticle(index));
+    for (let i = 0; i < count; i++) {
+      particles.push(createParticle(x + random(-8, 8), y + random(-8, 8), movement));
     }
 
-    for (let index = 0; index < PULSE_COUNT; index++) {
-      pulses.push(createPulse());
+    if (particles.length > MAX_PARTICLES) {
+      particles.splice(0, particles.length - MAX_PARTICLES);
     }
-
-    document.body.appendChild(field);
-    rafId = requestAnimationFrame(animate);
   }
 
-  function emitPulse(x, y, speed) {
-    const pulse = pulses[pulseIndex];
-    pulseIndex = (pulseIndex + 1) % pulses.length;
+  function updateParticle(particle, delta) {
+    const progress = particle.life / particle.ttl;
+    particle.life += delta;
+    particle.alpha *= 0.992;
+    particle.radius = particle.baseRadius * (1 - progress * 0.55);
+    particle.x += particle.vx * delta * 0.045 + Math.sin(particle.life * 0.018 + particle.pulsePhase) * 0.08;
+    particle.y += particle.vy * delta * 0.045 + Math.cos(particle.life * 0.015 + particle.pulsePhase) * 0.05;
+    particle.vx *= 0.98;
+    particle.vy *= 0.98;
 
-    pulse.x = x;
-    pulse.y = y;
-    pulse.age = 0;
-    pulse.size = Math.min(48, 28 + speed * 0.18);
-    pulse.element.style.setProperty('--pulse-size', `${pulse.size}px`);
+    return particle.life < particle.ttl && particle.alpha > 0.04 && particle.radius > 0.35;
+  }
+
+  function drawParticle(particle) {
+    const progress = particle.life / particle.ttl;
+    const radius = Math.max(0.8, particle.radius);
+    const color = parseColor(particle.color);
+    const alpha = clamp(particle.alpha * (1 - progress * 0.85), 0, 1);
+    const gradient = context.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, radius * (particle.glow ? 4.2 : 3.4));
+
+    gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`);
+    gradient.addColorStop(0.22, `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha * 0.36})`);
+    gradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`);
+
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.arc(particle.x, particle.y, radius, 0, Math.PI * 2);
+    context.fill();
+
+    if (particle.glow && Math.random() > 0.88) {
+      context.fillStyle = `rgba(255, 255, 255, ${alpha * 0.4})`;
+      context.beginPath();
+      context.arc(particle.x + random(-2, 2), particle.y + random(-2, 2), radius * 0.5, 0, Math.PI * 2);
+      context.fill();
+    }
+  }
+
+  function render(timestamp) {
+    if (!lastTimestamp) lastTimestamp = timestamp;
+    const delta = Math.min(timestamp - lastTimestamp, 33);
+    lastTimestamp = timestamp;
+
+    context.clearRect(0, 0, width, height);
+    context.globalCompositeOperation = 'lighter';
+
+    let writeIndex = 0;
+    for (let i = 0; i < particles.length; i++) {
+      const particle = particles[i];
+      if (updateParticle(particle, delta)) {
+        drawParticle(particle);
+        particles[writeIndex++] = particle;
+      }
+    }
+
+    particles.length = writeIndex;
+    animationFrame = requestAnimationFrame(render);
   }
 
   function handlePointerMove(event) {
-    const dx = event.clientX - pointer.x;
-    const dy = event.clientY - pointer.y;
-    const travel = Math.hypot(event.clientX - lastPulse.x, event.clientY - lastPulse.y);
-    const speed = Math.hypot(dx, dy);
+    const x = event.clientX;
+    const y = event.clientY;
+    const dx = x - lastX;
+    const dy = y - lastY;
+    const movement = Math.hypot(dx, dy);
 
-    pointer.x = event.clientX;
-    pointer.y = event.clientY;
-    lastMoveAt = performance.now();
-    hasPointer = true;
-
-    if (travel > PULSE_DISTANCE) {
-      emitPulse(pointer.x, pointer.y, speed);
-      lastPulse = { ...pointer };
+    if (movement > 1) {
+      spawnParticles(x, y, movement);
     }
 
-    if (!rafId) {
-      rafId = requestAnimationFrame(animate);
-    }
+    lastX = x;
+    lastY = y;
   }
 
-  function animate(now) {
-    const idleAmount = hasPointer ? Math.min(1, Math.max(0, (now - lastMoveAt - IDLE_FADE_DELAY) / 520)) : 1;
-    const velocityX = pointer.x - lastPointer.x;
-    const velocityY = pointer.y - lastPointer.y;
-    const speed = Math.min(90, Math.hypot(velocityX, velocityY));
-    let anchorX = pointer.x;
-    let anchorY = pointer.y;
-
-    particles.forEach((particle, index) => {
-      const offset = index * 2.8;
-      const targetX = anchorX - velocityX * (0.06 + index * 0.012) + Math.sin(now * 0.004 + index) * particle.drift;
-      const targetY = anchorY - velocityY * (0.06 + index * 0.012) + Math.cos(now * 0.003 + index) * particle.drift;
-
-      particle.x += (targetX - particle.x) * particle.ease;
-      particle.y += (targetY - particle.y) * particle.ease;
-      particle.opacity += ((hasPointer ? 0.74 - index * 0.055 : 0) * (1 - idleAmount) - particle.opacity) * 0.12;
-
-      const scale = 0.76 + (speed / 180) + index * 0.018;
-      particle.element.style.opacity = particle.opacity.toFixed(3);
-      particle.element.style.transform = `translate3d(${particle.x - particle.size / 2 - offset * 0.03}px, ${particle.y - particle.size / 2}px, 0) scale(${scale})`;
-
-      anchorX = particle.x;
-      anchorY = particle.y;
-    });
-
-    pulses.forEach((pulse) => {
-      if (pulse.age >= 1) {
-        pulse.element.style.opacity = '0';
-        return;
-      }
-
-      pulse.age = Math.min(1, pulse.age + 0.024);
-      const eased = 1 - Math.pow(1 - pulse.age, 3);
-      const opacity = (1 - eased) * 0.38;
-      const scale = 0.45 + eased * 1.45;
-
-      pulse.element.style.opacity = opacity.toFixed(3);
-      pulse.element.style.transform = `translate3d(${pulse.x - pulse.size / 2}px, ${pulse.y - pulse.size / 2}px, 0) scale(${scale})`;
-    });
-
-    lastPointer = { ...pointer };
-
-    const hasVisibleParticles = particles.some((particle) => particle.opacity > 0.01);
-    const hasActivePulses = pulses.some((pulse) => pulse.age < 1);
-
-    if (hasPointer || hasVisibleParticles || hasActivePulses) {
-      rafId = requestAnimationFrame(animate);
-    } else {
-      rafId = null;
-    }
+  function setup() {
+    resizeCanvas();
+    document.body.appendChild(field);
+    animationFrame = requestAnimationFrame(render);
   }
 
   window.addEventListener('pointermove', handlePointerMove, { passive: true });
-  window.addEventListener('pointerleave', () => {
-    hasPointer = false;
-  });
-  window.addEventListener('blur', () => {
-    hasPointer = false;
-  });
+  window.addEventListener('resize', resizeCanvas, { passive: true });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setup, { once: true });
   } else {
     setup();
   }
+
+  window.addEventListener('pagehide', () => {
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+  }, { once: true });
 })();

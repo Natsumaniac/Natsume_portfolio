@@ -7,6 +7,129 @@
 
 get_header();
 
+if ( ! function_exists( 'natsume_portfolio_sanitize_skill_logo_svg' ) ) {
+    /**
+     * Sanitize inline technology logos from ACF while preserving SVG icon markup.
+     *
+     * @param string $svg Raw SVG markup.
+     * @return string
+     */
+    function natsume_portfolio_sanitize_skill_logo_svg( $svg ) {
+        $svg = trim( (string) $svg );
+        if ( '' === $svg ) {
+            return '';
+        }
+
+        $svg_attributes = array(
+            'aria-hidden'       => true,
+            'aria-label'        => true,
+            'class'             => true,
+            'clip-path'         => true,
+            'clip-rule'         => true,
+            'cx'                => true,
+            'cy'                => true,
+            'd'                 => true,
+            'fill'              => true,
+            'fill-opacity'      => true,
+            'fill-rule'         => true,
+            'focusable'         => true,
+            'height'            => true,
+            'href'              => true,
+            'id'                => true,
+            'mask'              => true,
+            'offset'            => true,
+            'opacity'           => true,
+            'points'            => true,
+            'preserveAspectRatio' => true,
+            'r'                 => true,
+            'role'              => true,
+            'rx'                => true,
+            'ry'                => true,
+            'stop-color'        => true,
+            'stop-opacity'      => true,
+            'stroke'            => true,
+            'stroke-dasharray'  => true,
+            'stroke-linecap'    => true,
+            'stroke-linejoin'   => true,
+            'stroke-miterlimit' => true,
+            'stroke-opacity'    => true,
+            'stroke-width'      => true,
+            'style'             => true,
+            'transform'         => true,
+            'viewBox'           => true,
+            'viewbox'           => true,
+            'width'             => true,
+            'x'                 => true,
+            'x1'                => true,
+            'x2'                => true,
+            'xlink:href'        => true,
+            'xmlns'             => true,
+            'xmlns:xlink'       => true,
+            'y'                 => true,
+            'y1'                => true,
+            'y2'                => true,
+        );
+
+        $allowed_svg = array(
+            'svg'            => $svg_attributes,
+            'g'              => $svg_attributes,
+            'path'           => $svg_attributes,
+            'circle'         => $svg_attributes,
+            'rect'           => $svg_attributes,
+            'line'           => $svg_attributes,
+            'polyline'       => $svg_attributes,
+            'polygon'        => $svg_attributes,
+            'ellipse'        => $svg_attributes,
+            'defs'           => $svg_attributes,
+            'clipPath'       => $svg_attributes,
+            'clippath'       => $svg_attributes,
+            'linearGradient' => $svg_attributes,
+            'lineargradient' => $svg_attributes,
+            'radialGradient' => $svg_attributes,
+            'radialgradient' => $svg_attributes,
+            'stop'           => $svg_attributes,
+            'mask'           => $svg_attributes,
+            'pattern'        => $svg_attributes,
+            'title'          => array(),
+            'desc'           => array(),
+            'use'            => $svg_attributes,
+        );
+
+        return wp_kses( $svg, $allowed_svg );
+    }
+}
+
+if ( ! function_exists( 'natsume_portfolio_render_keyboard_key_content' ) ) {
+    /**
+     * Render keyboard key content with SVG-first skill logo support.
+     *
+     * @param array|null $skill Skill data.
+     * @param string     $fallback_label Keyboard fallback label.
+     * @return void
+     */
+    function natsume_portfolio_render_keyboard_key_content( $skill, $fallback_label ) {
+        $skill_title = is_array( $skill ) && ! empty( $skill['title'] ) ? (string) $skill['title'] : '';
+        $logo_svg    = is_array( $skill ) && ! empty( $skill['logo_svg'] )
+            ? natsume_portfolio_sanitize_skill_logo_svg( $skill['logo_svg'] )
+            : '';
+
+        if ( '' !== $skill_title && '' !== $logo_svg ) {
+            ?>
+            <span class="keycap__logo" aria-hidden="true">
+              <?php echo $logo_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            </span>
+            <span class="screen-reader-text"><?php echo esc_html( $skill_title ); ?></span>
+            <?php
+            return;
+        }
+        ?>
+        <span class="keycap__label">
+          <?php echo esc_html( $skill_title ? $skill_title : $fallback_label ); ?>
+        </span>
+        <?php
+    }
+}
+
 $skills_query = new WP_Query(
     array(
         'post_type'      => 'skill',
@@ -37,6 +160,7 @@ if ( $skills_query->have_posts() ) {
         $skill_id          = get_the_ID();
         $title             = get_the_title();
         $icon              = get_field( 'skill_icon', $skill_id );
+        $logo_svg          = (string) get_field( 'skill_logo_svg', $skill_id );
         $proficiency       = get_field( 'skill_proficiency', $skill_id );
         $percentage        = (int) get_field( 'skill_percentage', $skill_id );
         $description       = (string) get_field( 'skill_description', $skill_id );
@@ -83,6 +207,7 @@ if ( $skills_query->have_posts() ) {
             'title'       => $title,
             'icon_url'    => $icon_url,
             'icon_alt'    => $icon_alt,
+            'logo_svg'    => $logo_svg,
             'proficiency' => $proficiency,
             'percentage'  => max( 0, min( 100, $percentage ) ),
             'description' => $description,
@@ -144,32 +269,24 @@ $skill_categories = get_terms(
 <section id="skills-portal" class="skills-portal">
   <div class="skills-container">
 
-    <header class="skills-hero reveal-on-scroll">
-      <h1>MY SKILLS</h1>
-      <p>Technologies, tools, and expertise I use to build web, mobile, database, analytics, and security solutions.</p>
-      <div class="skills-hero__tools">
-        <label for="skills-search" class="screen-reader-text">Search Skills</label>
-        <input id="skills-search" class="js-skills-search" type="search" placeholder="Search Skills">
-      </div>
-      <div class="skills-counters">
-        <article><strong class="js-counter" data-target="<?php echo esc_attr( $total_skills ); ?>">0</strong><span>+ Skills</span></article>
-        <article><strong class="js-counter" data-target="<?php echo esc_attr( $total_technologies ); ?>">0</strong><span>Technologies</span></article>
-        <article><strong class="js-counter" data-target="<?php echo esc_attr( $total_projects ); ?>">0</strong><span>+ Projects</span></article>
-      </div>
-    </header>
-
     <section class="stack-balls reveal-on-scroll">
       <div class="balls-layout js-balls-layout">
         <div class="balls-stage-col">
           <div class="stack-balls__stage js-balls-stage">
+            <div class="stack-balls__plate" aria-label="Skills section title">
+              <span class="stack-balls__plate-eyebrow">Developer Operating System</span>
+              <h1 class="stack-balls__plate-title">Skills Kernel</h1>
+              <p class="stack-balls__plate-copy">Inspect technologies, tools, experience, and execution patterns across the development ecosystem.</p>
+            </div>
             <?php foreach ( $ball_skills as $index => $ball ) : ?>
               <div
                 class="stack-ball skill-basketball"
+                style="--label-tilt: <?php echo esc_attr( ( ( $index % 5 ) - 2 ) * 1.35 ); ?>deg;"
                 data-ball
                 data-index="<?php echo esc_attr( $index ); ?>"
                 data-skill-id="<?php echo esc_attr( $ball['id'] ); ?>"
                 data-skill-color="<?php echo esc_attr( $ball['color'] ); ?>">
-                <span><?php echo esc_html( $ball['title'] ); ?></span>
+                <span class="stack-ball__label"><?php echo esc_html( $ball['title'] ); ?></span>
               </div>
             <?php endforeach; ?>
           </div>
@@ -250,6 +367,8 @@ $skill_categories = get_terms(
     <script type="application/json" id="skill-viewer-data">
       <?php echo wp_json_encode( $skill_viewer_data ); ?>
     </script>
+
+    <?php natsume_portfolio_render_section_transition( 'section-transition--circuit' ); ?>
 
     <?php
     $keyboard_pool = array();
@@ -418,6 +537,14 @@ $skill_categories = get_terms(
     ?>
 
     <section class="skill-keyboard reveal-on-scroll">
+      <div class="os-section-heading">
+        <span class="line" aria-hidden="true"></span>
+        <div>
+          <p>Input Device</p>
+          <h2>Developer Keyboard</h2>
+          <span>A workstation-style command surface where every mapped key loads a real skill profile into the monitor.</span>
+        </div>
+      </div>
       <div class="keyboard-wrap js-developer-keyboard">
         <div class="keyboard-display" aria-live="polite">
           <div class="keyboard-display__screen-frame">
@@ -488,9 +615,7 @@ $skill_categories = get_terms(
                         data-skill-color="<?php echo esc_attr( $skill_color ); ?>"
                       <?php endif; ?>
                     >
-                      <span class="keycap__label">
-                        <?php echo esc_html( $is_skill_key ? $skill_title : $key_def['label'] ); ?>
-                      </span>
+                      <?php natsume_portfolio_render_keyboard_key_content( $skill, $key_def['label'] ); ?>
                     </button>
                   <?php endforeach; ?>
                 </div>
@@ -557,9 +682,7 @@ $skill_categories = get_terms(
                           data-skill-color="<?php echo esc_attr( $skill_color ); ?>"
                         <?php endif; ?>
                       >
-                        <span class="keycap__label">
-                          <?php echo esc_html( $is_skill_key ? $skill_title : $key_def['label'] ); ?>
-                        </span>
+                        <?php natsume_portfolio_render_keyboard_key_content( $skill, $key_def['label'] ); ?>
                       </button>
                     <?php endforeach; ?>
                   </div>
@@ -605,9 +728,7 @@ $skill_categories = get_terms(
                           data-skill-color="<?php echo esc_attr( $skill_color ); ?>"
                         <?php endif; ?>
                       >
-                        <span class="keycap__label">
-                          <?php echo esc_html( $is_skill_key ? $skill_title : $key_def['label'] ); ?>
-                        </span>
+                        <?php natsume_portfolio_render_keyboard_key_content( $skill, $key_def['label'] ); ?>
                       </button>
                     <?php endforeach; ?>
                   </div>
@@ -620,188 +741,175 @@ $skill_categories = get_terms(
       </div>
     </section>
 
-    <section class="tech-network reveal-on-scroll">
-      <div class="section-title"><h2>TECH NETWORK CLUSTERS</h2></div>
-      <div class="tech-network__grid js-category-grid">
-        <?php foreach ( $skill_categories as $category_index => $category ) : ?>
-          <?php
-          $skills_in_category = get_posts(
-              array(
-                  'post_type'   => 'skill',
-                  'numberposts' => -1,
-                  'meta_key'    => 'skill_order',
-                  'orderby'     => 'meta_value_num',
-                  'order'       => 'ASC',
-                  'tax_query'   => array(
-                      array(
-                          'taxonomy' => 'skill_category',
-                          'field'    => 'term_id',
-                          'terms'    => $category->term_id,
-                      ),
-                  ),
-              )
-          );
-
-          $node_count = max( 1, count( $skills_in_category ) );
-          $network_search = strtolower( $category->name . ' ' . implode( ' ', wp_list_pluck( $skills_in_category, 'post_title' ) ) );
-          ?>
-
-          <article
-            class="tech-cluster"
-            data-category-card
-            data-search="<?php echo esc_attr( $network_search ); ?>"
-            style="--cluster-index: <?php echo esc_attr( $category_index ); ?>;">
-            <svg class="tech-cluster__map" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <?php foreach ( $skills_in_category as $skill_index => $skill ) : ?>
-                <?php
-                $angle = ( -90 + ( 360 / $node_count ) * $skill_index ) * pi() / 180;
-                $x_pos = 50 + cos( $angle ) * 37;
-                $y_pos = 50 + sin( $angle ) * 32;
-                ?>
-                <line
-                  class="tech-cluster__line"
-                  data-network-line="<?php echo esc_attr( $skill_index ); ?>"
-                  x1="50"
-                  y1="50"
-                  x2="<?php echo esc_attr( round( $x_pos, 2 ) ); ?>"
-                  y2="<?php echo esc_attr( round( $y_pos, 2 ) ); ?>" />
-              <?php endforeach; ?>
-            </svg>
-
-            <div class="tech-cluster__hub">
-              <span>Cluster</span>
-              <strong><?php echo esc_html( $category->name ); ?></strong>
-              <em><?php echo esc_html( count( $skills_in_category ) ); ?> nodes</em>
-            </div>
-
-            <?php foreach ( $skills_in_category as $skill_index => $skill ) : ?>
-              <?php
-              $angle = ( -90 + ( 360 / $node_count ) * $skill_index ) * pi() / 180;
-              $x_pos = 50 + cos( $angle ) * 37;
-              $y_pos = 50 + sin( $angle ) * 32;
-              ?>
-              <span
-                class="tech-cluster__node"
-                data-network-node="<?php echo esc_attr( $skill_index ); ?>"
-                style="--node-x: <?php echo esc_attr( round( $x_pos, 2 ) ); ?>%; --node-y: <?php echo esc_attr( round( $y_pos, 2 ) ); ?>%;">
-                <?php echo esc_html( $skill->post_title ); ?>
-              </span>
-            <?php endforeach; ?>
-          </article>
-        <?php endforeach; ?>
-      </div>
-    </section>
-
-    <section class="developer-workspace reveal-on-scroll">
-      <div class="section-title"><h2>DEVELOPER WORKSPACE</h2></div>
-      <div class="workspace-console">
-        <div class="workspace-console__monitor">
-          <span>MONITOR AREA</span>
-          <strong class="js-workspace-spotlight">Hover a tool to inspect the workspace stack.</strong>
-        </div>
-
-        <div class="workspace-console__surface">
-          <?php if ( empty( $tool_skills ) ) : ?>
-            <p>No tools added yet.</p>
-          <?php else : ?>
-            <?php foreach ( $tool_skills as $tool_index => $tool ) : ?>
-              <article
-                class="workspace-tool"
-                data-tool-item
-                data-tool-title="<?php echo esc_attr( $tool['title'] ); ?>"
-                data-tool-prof="<?php echo esc_attr( $tool['proficiency'] ?: $tool['level'] ); ?>"
-                style="--tool-index: <?php echo esc_attr( $tool_index ); ?>;">
-                <div class="workspace-tool__icon">
-                  <?php if ( ! empty( $tool['icon_url'] ) ) : ?>
-                    <img src="<?php echo esc_url( $tool['icon_url'] ); ?>" alt="<?php echo esc_attr( $tool['icon_alt'] ); ?>">
-                  <?php else : ?>
-                    <i class="fa-solid fa-toolbox"></i>
-                  <?php endif; ?>
-                </div>
-                <strong><?php echo esc_html( $tool['title'] ); ?></strong>
-                <?php if ( ! empty( $tool['proficiency'] ) || ! empty( $tool['level'] ) ) : ?>
-                  <span><?php echo esc_html( $tool['proficiency'] ?: $tool['level'] ); ?></span>
-                <?php endif; ?>
-              </article>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </div>
-
-        <div class="workspace-console__dock" aria-hidden="true">
-          <span>WORKSPACE AREA</span>
-          <span>DOCK AREA</span>
-          <span>UTILITY AREA</span>
-        </div>
-        <div class="workspace-tooltip js-workspace-tooltip" aria-hidden="true"></div>
-      </div>
-    </section>
-
-    <section class="rpg-skill-tree reveal-on-scroll">
-      <div class="section-title"><h2>RPG SKILL TREE</h2></div>
-      <div class="skill-tree journey-timeline">
-        <?php
-        ksort( $timeline_skills );
-        $timeline_years = array_keys( $timeline_skills );
-        $latest_year = ! empty( $timeline_years ) ? max( $timeline_years ) : '';
-
-        foreach ( $timeline_skills as $year => $items ) :
-        ?>
-          <article class="skill-tree__checkpoint <?php echo (string) $year === (string) $latest_year ? 'is-current' : 'is-complete'; ?>">
-            <div class="skill-tree__year">
-              <span>Checkpoint</span>
-              <strong><?php echo esc_html( $year ); ?></strong>
-            </div>
-
-            <div class="skill-tree__nodes">
-              <?php foreach ( $items as $skill_index => $skill ) : ?>
-                <?php $learning_description = (string) get_field( 'learning_description', $skill['id'] ); ?>
-                <button
-                  class="skill-tree__node"
-                  type="button"
-                  data-tree-node
-                  data-tree-title="<?php echo esc_attr( $skill['title'] ); ?>"
-                  data-tree-year="<?php echo esc_attr( $year ); ?>"
-                  data-tree-desc="<?php echo esc_attr( $learning_description ); ?>"
-                  style="--node-index: <?php echo esc_attr( $skill_index ); ?>;">
-                  <span><?php echo esc_html( $skill['title'] ); ?></span>
-                </button>
-              <?php endforeach; ?>
-            </div>
-          </article>
-        <?php endforeach; ?>
-        <div class="skill-tree-tooltip js-skill-tree-tooltip" aria-hidden="true"></div>
-      </div>
-    </section>
+    <?php natsume_portfolio_render_section_transition( 'section-transition--scan' ); ?>
 
     <?php
+    ksort( $timeline_skills );
     $learning_years = array_filter( array_map( 'intval', array_keys( $timeline_skills ) ) );
     $years_experience = ! empty( $learning_years ) ? max( 1, (int) gmdate( 'Y' ) - min( $learning_years ) + 1 ) : 0;
     $resume = get_field( 'hero_resume', get_option( 'page_on_front' ) );
     $resume_url = is_array( $resume ) && ! empty( $resume['url'] ) ? $resume['url'] : home_url( '/resume/' );
+
+    $terminal_skills = array_map(
+        static function ( $skill ) {
+            return array(
+                'title'       => $skill['title'],
+                'level'       => $skill['proficiency'] ?: $skill['level'],
+                'percentage'  => (int) $skill['percentage'],
+                'experience'  => $skill['experience'],
+                'description' => wp_strip_all_tags( $skill['description'] ),
+                'categories'  => $skill['category_names'],
+                'tags'        => array_slice( (array) $skill['tags'], 0, 5 ),
+            );
+        },
+        $skills_data
+    );
+
+    $terminal_projects_query = new WP_Query(
+        array(
+            'post_type'      => 'work',
+            'posts_per_page' => 5,
+            'post_status'    => 'publish',
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        )
+    );
+
+    $terminal_projects = array();
+    if ( $terminal_projects_query->have_posts() ) {
+        while ( $terminal_projects_query->have_posts() ) {
+            $terminal_projects_query->the_post();
+            $project_tech_raw = (string) get_field( 'work_technologies', get_the_ID() );
+            $project_tech = function_exists( 'natsume_portfolio_parse_lines' )
+                ? natsume_portfolio_parse_lines( $project_tech_raw )
+                : preg_split( '/\r\n|\r|\n|,/', $project_tech_raw );
+
+            $terminal_projects[] = array(
+                'title'       => get_the_title(),
+                'url'         => get_permalink(),
+                'description' => wp_trim_words( wp_strip_all_tags( get_the_excerpt() ), 18, '...' ),
+                'tech'        => array_slice( array_values( array_filter( array_map( 'trim', (array) $project_tech ) ) ), 0, 4 ),
+            );
+        }
+        wp_reset_postdata();
+    }
+
+    $terminal_categories = array();
+    if ( ! empty( $skill_categories ) && ! is_wp_error( $skill_categories ) ) {
+        foreach ( $skill_categories as $category ) {
+            $terminal_categories[] = array(
+                'name'  => $category->name,
+                'count' => (int) $category->count,
+            );
+        }
+    }
+
+    $terminal_data = array(
+        'stats' => array(
+            'projects'     => $total_projects,
+            'skills'       => $total_skills,
+            'technologies' => count( $tech_set ),
+            'years'        => $years_experience,
+        ),
+        'skills'     => $terminal_skills,
+        'tools'      => array_values( array_map( static function ( $tool ) {
+            return $tool['title'];
+        }, $tool_skills ) ),
+        'projects'   => $terminal_projects,
+        'categories' => $terminal_categories,
+        'links'      => array(
+            'projects' => get_post_type_archive_link( 'work' ),
+            'contact'  => home_url( '/contact/' ),
+            'resume'   => $resume_url,
+            'about'    => home_url( '/about/' ),
+        ),
+        'about'      => array(
+            'name'    => get_bloginfo( 'name' ),
+            'tagline' => get_bloginfo( 'description' ),
+        ),
+    );
     ?>
-    <section class="mission-control reveal-on-scroll">
-      <div class="mission-control__shell">
-        <div class="mission-control__header">
-          <div>
-            <span>COMMAND CENTER</span>
-            <h2>MISSION CONTROL</h2>
+
+    <?php
+    $terminal_command_icons = array(
+        'help'       => 'fa-solid fa-circle-question',
+        'skills'     => 'fa-solid fa-microchip',
+        'projects'   => 'fa-solid fa-diagram-project',
+        'experience' => 'fa-solid fa-chart-line',
+        'resume'     => 'fa-solid fa-file-lines',
+        'contact'    => 'fa-solid fa-satellite-dish',
+        'about'      => 'fa-solid fa-user-astronaut',
+    );
+    ?>
+
+    <section class="natsume-os-terminal reveal-on-scroll" data-natsume-terminal>
+      <div class="terminal-particles" aria-hidden="true">
+        <?php for ( $particle_index = 0; $particle_index < 22; $particle_index++ ) : ?>
+          <span style="--particle-index: <?php echo esc_attr( $particle_index ); ?>; --particle-x: <?php echo esc_attr( ( $particle_index * 37 ) % 100 ); ?>%; --particle-y: <?php echo esc_attr( ( $particle_index * 23 ) % 100 ); ?>%;"></span>
+        <?php endfor; ?>
+      </div>
+
+      <div class="natsume-os-terminal__header">
+        <div class="skills-page-heading">
+          <span class="line" aria-hidden="true"></span>
+          <p class="skills-page-heading__eyebrow">Boot Sequence Complete</p>
+          <h2>NATSUME OS Terminal</h2>
+        </div>
+        <p>Portfolio kernel initialized. Type commands, run modules, and inspect live project telemetry from a focused developer console.</p>
+      </div>
+
+      <div class="os-terminal-shell">
+        <div class="os-terminal-topbar" aria-hidden="true">
+          <span></span><span></span><span></span>
+          <strong>natsume-os://skills/kernel</strong>
+          <em>SYSTEM STATUS: ONLINE</em>
+        </div>
+
+        <div class="os-terminal-body">
+          <nav class="os-command-rail" aria-label="Terminal commands">
+            <?php foreach ( array( 'help', 'skills', 'projects', 'experience', 'resume', 'contact', 'about' ) as $command ) : ?>
+              <button type="button" data-terminal-command="<?php echo esc_attr( $command ); ?>">
+                <i class="<?php echo esc_attr( $terminal_command_icons[ $command ] ); ?>" aria-hidden="true"></i>
+                <span>./<?php echo esc_html( $command ); ?></span>
+                <em>module</em>
+              </button>
+            <?php endforeach; ?>
+          </nav>
+
+          <div class="os-console">
+            <div class="os-console__scanline" aria-hidden="true"></div>
+            <div class="os-console__corners" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <div class="os-console__history js-terminal-history" aria-live="polite"></div>
+            <label class="os-console__prompt" for="natsume-terminal-input">
+              <span>visitor@natsume-os:~$</span>
+              <input id="natsume-terminal-input" class="js-terminal-input" type="text" autocomplete="off" spellcheck="false" value="help">
+              <i aria-hidden="true"></i>
+            </label>
           </div>
-          <strong><i></i>READY FOR NEW PROJECTS</strong>
+
+          <aside class="os-status-stream" aria-label="Portfolio status panel">
+            <div class="os-status-stream__header">
+              <span><i></i> MONITOR</span>
+              <strong>LIVE</strong>
+            </div>
+            <p class="is-online"><span>system.online</span><strong>true</strong><em></em></p>
+            <p style="--meter: <?php echo esc_attr( min( 100, max( 8, $total_projects * 8 ) ) ); ?>%;"><span>projects.completed</span><strong class="js-counter" data-target="<?php echo esc_attr( $total_projects ); ?>">0</strong><em></em></p>
+            <p style="--meter: <?php echo esc_attr( min( 100, max( 12, $total_skills * 6 ) ) ); ?>%;"><span>skills.mastered</span><strong class="js-counter" data-target="<?php echo esc_attr( $total_skills ); ?>">0</strong><em></em></p>
+            <p style="--meter: <?php echo esc_attr( min( 100, max( 18, count( $tech_set ) * 2 ) ) ); ?>%;"><span>technologies.loaded</span><strong class="js-counter" data-target="<?php echo esc_attr( count( $tech_set ) ); ?>">0</strong><em></em></p>
+            <p style="--meter: <?php echo esc_attr( min( 100, max( 10, $years_experience * 12 ) ) ); ?>%;"><span>experience.years</span><strong class="js-counter" data-target="<?php echo esc_attr( $years_experience ); ?>">0</strong><em></em></p>
+          </aside>
         </div>
 
-        <div class="mission-control__grid">
-          <article><span>Projects Completed</span><strong class="js-counter" data-target="<?php echo esc_attr( $total_projects ); ?>">0</strong></article>
-          <article><span>Skills Learned</span><strong class="js-counter" data-target="<?php echo esc_attr( $total_skills ); ?>">0</strong></article>
-          <article><span>Technologies Used</span><strong class="js-counter" data-target="<?php echo esc_attr( $total_technologies ); ?>">0</strong></article>
-          <article><span>Years of Experience</span><strong class="js-counter" data-target="<?php echo esc_attr( $years_experience ); ?>">0</strong></article>
-        </div>
-
-        <div class="mission-control__actions">
-          <a href="<?php echo esc_url( get_post_type_archive_link( 'work' ) ); ?>">🚀 Launch Projects</a>
-          <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>">📨 Open Communication</a>
-          <a href="<?php echo esc_url( $resume_url ); ?>">📄 View Resume</a>
+        <div class="os-terminal-actions" aria-label="Primary terminal actions">
+          <a href="<?php echo esc_url( get_post_type_archive_link( 'work' ) ); ?>" data-terminal-action="projects"><span>$</span> run projects <em>launch://works</em></a>
+          <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>" data-terminal-action="contact"><span>$</span> open comms <em>open://contact</em></a>
+          <a href="<?php echo esc_url( $resume_url ); ?>" data-terminal-action="resume"><span>$</span> cat resume <em>resume://cv</em></a>
         </div>
       </div>
+
+      <script type="application/json" id="natsume-terminal-data">
+        <?php echo wp_json_encode( $terminal_data ); ?>
+      </script>
     </section>
 
   </div>

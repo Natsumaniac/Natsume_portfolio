@@ -219,13 +219,13 @@
 }
 
 .about-image img {
-  width: 900px;
+  width: 950px;
   height: 1000px;
 }
 
 .about-title {
   position: absolute;
-  top: 150px;
+  top: -100px;
   left: 400px;
   display: flex;
   align-items: center;
@@ -245,7 +245,7 @@
 /* ANIMATED ABOUT BORDER BOX */
 .about-box {
   position: absolute;
-  top: 220px;
+  top: 170px;
   left: 550px;
 
   width: 800px;
@@ -315,7 +315,7 @@
 
 .about-text {
   position: absolute;
-  top: 240px;
+  top: 200px;
   left: 580px;
   width: 740px;
   z-index: 3;
@@ -333,7 +333,7 @@
 /* ABOUT BUTTON WRAPPER */
 .about-buttons {
   position: absolute;
-  top: 670px;
+  top: 600px;
   left: 900px;
   z-index: 3;
 }
@@ -350,7 +350,7 @@
 
 .about-title {
   position: absolute;
-  top: 150px;
+  top: 100px;
   left: 400px;
 
   display: flex;
@@ -457,7 +457,7 @@
 
 .works-title {
   position: absolute;
-  top: 14%;
+  top: 10%;
   left: 50%;
 
   transform: translateX(-50%);
@@ -515,7 +515,7 @@
 
 .works-slider {
   position: absolute;
-  top: 200px;
+  top: 180px;
   left: 50%;
 
   transform: translateX(-50%);
@@ -540,6 +540,10 @@
   height: 340px;
 
   opacity: 0;
+  display: block;
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
 
   transition:
     transform 0.5s ease,
@@ -581,6 +585,40 @@
   padding: 10px;
 
   border-radius: 18px;
+}
+
+.work-item__placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at center, rgba(255, 122, 0, 0.16), transparent 48%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 122, 0, 0.06));
+  color: #ff7a00;
+  font-size: 2rem;
+}
+
+.works-empty,
+.skills-empty {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 18px 24px;
+  border: 1px solid rgba(255, 122, 0, 0.16);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.72);
+  text-align: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.work-item:focus-visible {
+  outline: 2px solid rgba(255, 179, 71, 0.72);
+  outline-offset: 4px;
 }
 
 .work-overlay {
@@ -761,7 +799,7 @@
 .works-btn {
   position: absolute;
 
-  top: 85%;
+  top: 80%;
   left: 50%;
 
   transform: translateX(-50%);
@@ -846,7 +884,7 @@
 
 .skills-image {
   position: absolute;
-  top: 16%;
+  top: 12%;
   left: 100px;
 }
 
@@ -857,7 +895,7 @@
 
 .skills-title {
   position: absolute;
-  top: 170px;
+  top: 100px;
   right: 22%;
   font-size: 42px;
   font-weight: 700;
@@ -899,7 +937,7 @@
 
 .skills-content {
   position: absolute;
-  top: 300px;
+  top: 200px;
   right: 150px;
   width: 700px;
 }
@@ -977,7 +1015,7 @@
 
 .skills-btn {
   position: absolute;
-  top: 80%;
+  top: 78%;
   left: 66%;
   transform: translateX(-50%);
 }
@@ -1050,7 +1088,7 @@
 
 .cert-title {
   position: absolute;
-  top: 130px;
+  top: 100px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 20;
@@ -1093,7 +1131,7 @@
   position: relative;
   width: 100%;
   min-height: calc(100vh - 200px);
-  margin-top: 50px;
+  margin-top: 10px;
   padding-top: 0;
   overflow: hidden;
 
@@ -1187,7 +1225,7 @@
   flex-shrink: 0;
   min-width: 240px;
   height: 52px;
-  border-radius: 10px;
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1213,7 +1251,7 @@
 
 .cert-button-card i {
   font-size: 12px;
-  margin-left: 10px;
+  margin-right: 10px;
   transition: transform 0.3s ease;
 }
 

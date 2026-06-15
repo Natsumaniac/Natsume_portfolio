@@ -2,11 +2,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const reveals = document.querySelectorAll('.reveal-on-scroll');
   const counters = document.querySelectorAll('.js-counter');
   const progressBars = document.querySelectorAll('.js-progress');
-  const searchInput = document.querySelector('.js-skills-search');
-  const categoryCards = document.querySelectorAll('[data-category-card]');
   const developerKeyboard = document.querySelector('.js-developer-keyboard');
   const tooltip = developerKeyboard?.querySelector('[data-key-tooltip]') || null;
-  const timeline = document.querySelector('.journey-timeline');
 
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
@@ -48,31 +45,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }, { threshold: 0.3 });
   progressBars.forEach((el) => progressObserver.observe(el));
 
-  if (searchInput && categoryCards.length) {
-    searchInput.addEventListener('input', () => {
-      const q = searchInput.value.trim().toLowerCase();
-      categoryCards.forEach((card) => {
-        const haystack = card.dataset.search || '';
-        card.classList.toggle('is-hidden', q.length && !haystack.includes(q));
-      });
-    });
-  }
-
   if (developerKeyboard && tooltip) initDeveloperKeyboard(developerKeyboard, tooltip);
-  initTechNetworkClusters();
-  initDeveloperWorkspace();
-  initSkillTreeTooltips();
-
-  if (timeline) {
-    const timeObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        timeline.classList.add('is-visible');
-        timeObserver.unobserve(timeline);
-      });
-    }, { threshold: 0.3 });
-    timeObserver.observe(timeline);
-  }
+  initNatsumeOsTerminal();
 
   const panelDataEl = document.getElementById('skill-viewer-data');
   const panelRoot = document.querySelector('.js-ball-info-panel');
@@ -121,85 +95,318 @@ function positionFloatingTooltip(tooltip, target) {
   tooltip.style.top = `${top}px`;
 }
 
-function initTechNetworkClusters() {
-  const clusters = document.querySelectorAll('.tech-cluster');
-  if (!clusters.length) return;
+function initNatsumeOsTerminal() {
+  const root = document.querySelector('[data-natsume-terminal]');
+  const dataEl = document.getElementById('natsume-terminal-data');
+  if (!root || !dataEl) return;
 
-  clusters.forEach((cluster) => {
-    const nodes = cluster.querySelectorAll('[data-network-node]');
-    const lines = cluster.querySelectorAll('[data-network-line]');
+  const history = root.querySelector('.js-terminal-history');
+  const input = root.querySelector('.js-terminal-input');
+  const commandButtons = root.querySelectorAll('[data-terminal-command]');
+  const actionLinks = root.querySelectorAll('[data-terminal-action]');
+  if (!history || !input) return;
 
-    nodes.forEach((node) => {
-      const index = node.dataset.networkNode;
-      const line = cluster.querySelector(`[data-network-line="${index}"]`);
+  let terminalData = {};
+  try {
+    terminalData = JSON.parse(dataEl.textContent || '{}');
+  } catch (error) {
+    console.warn('Natsume OS terminal parse error', error);
+    terminalData = {};
+  }
 
-      node.addEventListener('pointerenter', () => {
-        nodes.forEach((item) => item.classList.toggle('is-active', item === node));
-        lines.forEach((item) => item.classList.toggle('is-active', item === line));
+  const commands = ['help', 'skills', 'projects', 'experience', 'resume', 'contact', 'about'];
+  const commandAliases = {
+    'run projects': 'projects',
+    'launch://works': 'projects',
+    'open comms': 'contact',
+    'open://contact': 'contact',
+    'cat resume': 'resume',
+    'resume://cv': 'resume',
+    './help': 'help',
+    './skills': 'skills',
+    './projects': 'projects',
+    './experience': 'experience',
+    './resume': 'resume',
+    './contact': 'contact',
+    './about': 'about'
+  };
+  const commandHistory = [];
+  let historyIndex = 0;
+  let typeTimer = null;
+  let typeToken = 0;
+  let suggestionEl = root.querySelector('.js-terminal-suggestions');
+
+  if (!suggestionEl) {
+    suggestionEl = document.createElement('div');
+    suggestionEl.className = 'os-console__suggestions js-terminal-suggestions';
+    suggestionEl.setAttribute('aria-hidden', 'true');
+    input.closest('.os-console')?.appendChild(suggestionEl);
+  }
+
+  function stopTyping() {
+    if (typeTimer) window.clearTimeout(typeTimer);
+    typeTimer = null;
+    typeToken++;
+  }
+
+  function appendLine(text = '', className = '') {
+    const line = document.createElement('p');
+    if (className) line.className = className;
+    line.textContent = text;
+    history.appendChild(line);
+    history.scrollTop = history.scrollHeight;
+    return line;
+  }
+
+  function typeLines(lines, onComplete) {
+    stopTyping();
+    const token = typeToken;
+    const queue = Array.isArray(lines) ? lines : [String(lines || '')];
+    let lineIndex = 0;
+    let charIndex = 0;
+    let activeLine = appendLine('', 'is-typing');
+
+    function tick() {
+      if (token !== typeToken) return;
+
+      const current = queue[lineIndex] || '';
+      activeLine.textContent = current.slice(0, charIndex);
+      history.scrollTop = history.scrollHeight;
+      charIndex++;
+
+      if (charIndex <= current.length) {
+        const character = current.charAt(charIndex - 2);
+        typeTimer = window.setTimeout(tick, character === ' ' ? 8 : 12 + Math.random() * 12);
+        return;
+      }
+
+      activeLine.classList.remove('is-typing');
+      lineIndex++;
+      charIndex = 0;
+
+      if (lineIndex < queue.length) {
+        activeLine = appendLine('', 'is-typing');
+        typeTimer = window.setTimeout(tick, 80);
+      } else {
+        typeTimer = null;
+        if (typeof onComplete === 'function') onComplete();
+      }
+    }
+
+    tick();
+  }
+
+  function normalizeCommand(rawCommand) {
+    const value = String(rawCommand || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    if (commands.includes(value)) return value;
+    if (commandAliases[value]) return commandAliases[value];
+    const direct = value.replace(/^\.\//, '');
+    if (commands.includes(direct)) return direct;
+    const suggestion = commands.find((command) => command.startsWith(value));
+    return suggestion || 'help';
+  }
+
+  function getSuggestions(value) {
+    const query = String(value || '').trim().toLowerCase();
+    if (!query) return commands.slice(0, 4);
+
+    return [
+      ...commands.filter((command) => command.startsWith(query)),
+      ...Object.keys(commandAliases).filter((alias) => alias.startsWith(query))
+    ].slice(0, 4);
+  }
+
+  function updateSuggestions() {
+    const suggestions = getSuggestions(input.value);
+    commandButtons.forEach((button) => {
+      const command = button.dataset.terminalCommand || '';
+      button.classList.toggle('is-suggested', suggestions.includes(command) && command !== input.value.trim().toLowerCase());
+    });
+
+    if (!suggestionEl) return;
+    suggestionEl.innerHTML = suggestions.map((suggestion) => `<span>${suggestion}</span>`).join('');
+    suggestionEl.classList.toggle('is-visible', suggestions.length > 0 && document.activeElement === input);
+  }
+
+  function formatSkill(skill, index) {
+    const title = skill.title || 'Unknown module';
+    const level = skill.level || 'Operational';
+    const percent = Number.isFinite(parseInt(skill.percentage, 10)) ? parseInt(skill.percentage, 10) : 0;
+    const categories = Array.isArray(skill.categories) && skill.categories.length ? skill.categories.join('/') : 'core';
+    const tags = Array.isArray(skill.tags) && skill.tags.length ? ` :: ${skill.tags.join(', ')}` : '';
+    return `[${String(index + 1).padStart(2, '0')}] ${title.toUpperCase()} | ${level} | ${percent}% | ${categories}${tags}`;
+  }
+
+  function buildCommandOutput(command) {
+    const stats = terminalData.stats || {};
+    const links = terminalData.links || {};
+    const skills = Array.isArray(terminalData.skills) ? terminalData.skills : [];
+    const projects = Array.isArray(terminalData.projects) ? terminalData.projects : [];
+    const categories = Array.isArray(terminalData.categories) ? terminalData.categories : [];
+    const tools = Array.isArray(terminalData.tools) ? terminalData.tools : [];
+
+    switch (command) {
+      case 'skills':
+        return [
+          'loading /usr/natsume/skills.manifest',
+          `modules detected: ${stats.skills || skills.length}`,
+          `technology signatures: ${stats.technologies || 0}`,
+          ...categories.slice(0, 6).map((category) => `cluster:${String(category.name || 'general').toLowerCase()} nodes=${category.count || 0}`),
+          '--- mastered modules ---',
+          ...skills.slice(0, 12).map(formatSkill),
+          skills.length > 12 ? `+ ${skills.length - 12} additional modules available in ecosystem memory` : 'end of skill manifest'
+        ];
+      case 'projects':
+        return [
+          'querying /var/portfolio/work-index',
+          `projects completed: ${stats.projects || projects.length}`,
+          ...projects.map((project, index) => {
+            const tech = Array.isArray(project.tech) && project.tech.length ? ` [${project.tech.join(', ')}]` : '';
+            return `${String(index + 1).padStart(2, '0')} ${project.title || 'Untitled Project'}${tech} -> launch://works/${String(index + 1).padStart(2, '0')}`;
+          }),
+          'launch route: launch://works'
+        ];
+      case 'experience':
+        return [
+          'reading /etc/natsume/experience.conf',
+          `years_of_experience=${stats.years || 0}`,
+          `skills_mastered=${stats.skills || skills.length}`,
+          `projects_completed=${stats.projects || projects.length}`,
+          tools.length ? `workspace_tools=${tools.slice(0, 10).join(', ')}` : 'workspace_tools=core editor, browser, terminal',
+          'status=available_for_builds'
+        ];
+      case 'resume':
+        return [
+          'mounting resume artifact',
+          'resume.path=resume://cv',
+          'permission=public-read',
+          'command ready: cat resume.pdf'
+        ];
+      case 'contact':
+        return [
+          'opening secure communication channel',
+          'contact.endpoint=open://contact',
+          'handshake=ready',
+          'message_queue=accepting_new_projects'
+        ];
+      case 'about': {
+        const about = terminalData.about || {};
+        return [
+          'cat /home/natsume/profile',
+          `name=${about.name || 'Natsume Portfolio'}`,
+          `tagline=${about.tagline || 'Developer portfolio operating system'}`,
+          'about.route=open://profile',
+          'mode=futuristic developer workstation'
+        ];
+      }
+      case 'help':
+      default:
+        return [
+          'NATSUME OS TERMINAL v4.7.0',
+          'available commands:',
+          'help        show command index',
+          'skills      print skill manifest',
+          'projects    list recent deployed work',
+          'experience  inspect professional telemetry',
+          'resume      locate resume artifact',
+          'contact     open communication endpoint',
+          'about       read profile data',
+          'aliases: run projects | open comms | cat resume',
+          'tab=autocomplete, arrows=history, enter=execute'
+        ];
+    }
+  }
+
+  function runCommand(rawCommand) {
+    const typedCommand = String(rawCommand || '').trim();
+    const normalized = normalizeCommand(typedCommand);
+    const displayCommand = typedCommand || normalized;
+
+    stopTyping();
+    root.classList.add('is-executing');
+    commandButtons.forEach((button) => {
+      button.classList.toggle('is-active', button.dataset.terminalCommand === normalized);
+      button.classList.remove('is-suggested');
+    });
+    input.value = normalized;
+    if (suggestionEl) suggestionEl.classList.remove('is-visible');
+    if (displayCommand && commandHistory[commandHistory.length - 1] !== displayCommand) {
+      commandHistory.push(displayCommand);
+    }
+    historyIndex = commandHistory.length;
+    appendLine(`visitor@natsume-os:~$ ${displayCommand}`, 'is-command');
+    typeLines([
+      'Executing command...',
+      `Loading module: ${normalized}.mod`,
+      'Success.'
+    ], () => {
+      typeLines(buildCommandOutput(normalized), () => {
+        root.classList.remove('is-executing');
       });
+    });
+  }
 
-      node.addEventListener('pointerleave', () => {
-        nodes.forEach((item) => item.classList.remove('is-active'));
-        lines.forEach((item) => item.classList.remove('is-active'));
-      });
+  commandButtons.forEach((button) => {
+    button.addEventListener('click', () => runCommand(button.dataset.terminalCommand));
+    button.addEventListener('pointerenter', () => {
+      input.value = button.dataset.terminalCommand || '';
+      updateSuggestions();
     });
   });
-}
 
-function initDeveloperWorkspace() {
-  const tools = document.querySelectorAll('[data-tool-item]');
-  const spotlight = document.querySelector('.js-workspace-spotlight');
-  const tooltip = document.querySelector('.js-workspace-tooltip');
-  if (!tools.length || !tooltip) return;
-
-  const defaultText = spotlight?.textContent || '';
-
-  tools.forEach((tool) => {
-    tool.addEventListener('pointerenter', () => {
-      const title = tool.dataset.toolTitle || 'Tool';
-      const proficiency = tool.dataset.toolProf || 'Workspace utility';
-
-      tools.forEach((item) => item.classList.toggle('is-active', item === tool));
-      if (spotlight) spotlight.textContent = `${title} · ${proficiency}`;
-      tooltip.innerHTML = `<strong>${escapeTooltipHtml(title)}</strong><span>${escapeTooltipHtml(proficiency)}</span>`;
-      tooltip.classList.add('is-visible');
-      requestAnimationFrame(() => positionFloatingTooltip(tooltip, tool));
-    });
-
-    tool.addEventListener('pointermove', () => positionFloatingTooltip(tooltip, tool));
-
-    tool.addEventListener('pointerleave', () => {
-      tool.classList.remove('is-active');
-      tooltip.classList.remove('is-visible');
-      if (spotlight) spotlight.textContent = defaultText;
+  actionLinks.forEach((link) => {
+    link.addEventListener('pointerenter', () => {
+      const action = link.dataset.terminalAction || 'help';
+      const actionCommands = {
+        projects: 'run projects',
+        contact: 'open comms',
+        resume: 'cat resume'
+      };
+      input.value = actionCommands[action] || action;
+      updateSuggestions();
     });
   });
-}
 
-function initSkillTreeTooltips() {
-  const nodes = document.querySelectorAll('[data-tree-node]');
-  const tooltip = document.querySelector('.js-skill-tree-tooltip');
-  if (!nodes.length || !tooltip) return;
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      runCommand(input.value);
+      return;
+    }
 
-  nodes.forEach((node) => {
-    node.addEventListener('pointerenter', () => {
-      const title = node.dataset.treeTitle || 'Skill';
-      const year = node.dataset.treeYear || '';
-      const desc = node.dataset.treeDesc || 'Unlocked milestone';
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      const firstSuggestion = getSuggestions(input.value)[0];
+      if (firstSuggestion) {
+        input.value = firstSuggestion;
+        updateSuggestions();
+      }
+      return;
+    }
 
-      nodes.forEach((item) => item.classList.toggle('is-active', item === node));
-      tooltip.innerHTML = `<strong>${escapeTooltipHtml(title)}</strong><span>${escapeTooltipHtml(year)}</span><p>${escapeTooltipHtml(desc)}</p>`;
-      tooltip.classList.add('is-visible');
-      requestAnimationFrame(() => positionFloatingTooltip(tooltip, node));
-    });
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      historyIndex = Math.max(0, historyIndex - 1);
+      input.value = commandHistory[historyIndex] || input.value;
+      updateSuggestions();
+      return;
+    }
 
-    node.addEventListener('pointermove', () => positionFloatingTooltip(tooltip, node));
-
-    node.addEventListener('pointerleave', () => {
-      node.classList.remove('is-active');
-      tooltip.classList.remove('is-visible');
-    });
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      historyIndex = Math.min(commandHistory.length, historyIndex + 1);
+      input.value = commandHistory[historyIndex] || '';
+      updateSuggestions();
+    }
   });
+
+  input.addEventListener('input', updateSuggestions);
+  input.addEventListener('focus', updateSuggestions);
+  input.addEventListener('blur', () => {
+    window.setTimeout(() => suggestionEl?.classList.remove('is-visible'), 120);
+  });
+
+  runCommand('help');
 }
 
 function initBallInfoPanel(layoutRoot, panelRoot, data) {
@@ -694,11 +901,11 @@ function initBalls(stage, panelController, layoutRoot) {
   balls.forEach((el, index) => {
     const visualRadius = Math.max(20, el.offsetWidth / 2);
     const pickRadius = visualRadius + 10;
-    const columns = Math.max(3, Math.ceil(Math.sqrt(balls.length)));
+    const columns = Math.min(5, Math.max(3, Math.ceil(Math.sqrt(balls.length * 1.2))));
     const col = index % columns;
     const row = Math.floor(index / columns);
-    const startX = 80 + col * ((stageWidth - 160) / Math.max(1, columns - 1));
-    const startY = -120 - row * (visualRadius * 2.4);
+    const startX = 90 + col * ((stageWidth - 180) / Math.max(1, columns - 1));
+    const startY = Math.max(165, stageHeight - 96 - row * (visualRadius * 1.38));
 
     const body = Bodies.circle(startX, startY, pickRadius, {
       restitution: 0.56,
@@ -849,7 +1056,7 @@ function initBalls(stage, panelController, layoutRoot) {
     items.forEach((item) => {
       const displayX = item.body.position.x - item.visualRadius;
       const displayY = item.body.position.y - item.visualRadius;
-      item.el.style.transform = `translate(${displayX}px, ${displayY}px)`;
+      item.el.style.transform = `translate(${displayX}px, ${displayY}px) translateY(var(--ball-lift, 0px)) scale(var(--ball-scale, 1))`;
     });
     requestAnimationFrame(render);
   }

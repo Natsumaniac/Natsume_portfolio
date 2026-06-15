@@ -59,12 +59,30 @@ function natsume_portfolio_enqueue_assets() {
         NATSUME_PORTFOLIO_VERSION
     );
 
-    // ─── Premium Cursor Trail ────────────────────────────────────────
+    // ─── Orange Particle Field ───────────────────────────────────────
     wp_enqueue_style(
         'natsume_portfolio-cursor-trail',
         NATSUME_PORTFOLIO_URI . '/assets/css/cursor-trail.css',
         array( 'natsume_portfolio-main' ),
         NATSUME_PORTFOLIO_VERSION
+    );
+
+    // ─── GSAP Core ───────────────────────────────────────────────────
+    wp_enqueue_script(
+        'natsume_portfolio-gsap',
+        'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js',
+        array(),
+        null,
+        true
+    );
+
+    // ─── GSAP ScrollTrigger ──────────────────────────────────────────
+    wp_enqueue_script(
+        'natsume_portfolio-scrolltrigger',
+        'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js',
+        array('natsume_portfolio-gsap'),
+        null,
+        true
     );
 
     if ( is_post_type_archive( 'work' ) ) {
@@ -142,7 +160,7 @@ function natsume_portfolio_enqueue_assets() {
         true
     );
 
-    // ─── Premium Cursor Trail JS ─────────────────────────────────────
+    // ─── Orange Particle Field JS ────────────────────────────────────
     wp_enqueue_script(
         'natsume_portfolio-cursor-trail',
         NATSUME_PORTFOLIO_URI . '/assets/js/cursor-trail.js',
@@ -157,24 +175,6 @@ function natsume_portfolio_enqueue_assets() {
         NATSUME_PORTFOLIO_URI . '/assets/js/work.js',
         array(),
         NATSUME_PORTFOLIO_VERSION,
-        true
-    );
-
-    // ─── GSAP Core ───────────────────────────────────────────────────
-    wp_enqueue_script(
-        'natsume_portfolio-gsap',
-        'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js',
-        array(),
-        null,
-        true
-    );
-
-    // ─── GSAP ScrollTrigger ──────────────────────────────────────────
-    wp_enqueue_script(
-        'natsume_portfolio-scrolltrigger',
-        'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js',
-        array('natsume_portfolio-gsap'),
-        null,
         true
     );
 
@@ -230,4 +230,23 @@ function natsume_portfolio_enqueue_assets() {
             true
         );
     }
+
+    if ( is_page_template( 'templates/page-resume.php' ) ) {
+        wp_enqueue_style(
+            'natsume_portfolio-resume',
+            NATSUME_PORTFOLIO_URI . '/assets/css/resume.css',
+            array( 'natsume_portfolio-main', 'natsume_portfolio-components' ),
+            NATSUME_PORTFOLIO_VERSION
+        );
+    }
+
+    if (is_page_template('templates/page-contact.php')) {
+        wp_enqueue_style(
+            'natsume_portfolio-contact',
+            NATSUME_PORTFOLIO_URI . '/assets/css/contact.css',
+            array( 'natsume_portfolio-main', 'natsume_portfolio-components' ),
+            NATSUME_PORTFOLIO_VERSION
+        );
+    }
 }
+
